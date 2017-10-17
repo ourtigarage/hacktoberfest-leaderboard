@@ -86,6 +86,6 @@ get '/' do
   erb :index, locals: {leaderboard: leaderboard}
 end
 
-get '/members' do
+get '/api/members' do
   leaderboard.members.to_json
 end
