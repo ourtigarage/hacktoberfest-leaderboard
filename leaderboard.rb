@@ -30,8 +30,9 @@ class Leaderboard
   end
 
   def member_contributions(username)
-    contribs = @github.search.issues("created:>#{EVENT_DATE} author:#{username}")
-    contribs.body.items.reject{ |i| i.pull_request.nil? }
+    query = "created:>#{EVENT_DATE} author:#{username}"
+    contribs = @github.search.issues(query)
+    contribs.body.items.reject { |i| i.pull_request.nil? }
   end
 
   private
@@ -64,7 +65,7 @@ class Member
     @profile = github_user.html_url
   end
 
-  def to_json(*opts)
+  def to_json(*_opts)
     {
       username: @username,
       fullname: @fulname,
@@ -83,7 +84,7 @@ set :port, (ENV['PORT'] || 80).to_i
 set :public_folder, File.dirname(__FILE__) + '/static'
 
 get '/' do
-  erb :index, locals: {leaderboard: leaderboard}
+  erb :index, locals: { leaderboard: leaderboard }
 end
 
 get '/api/members' do
