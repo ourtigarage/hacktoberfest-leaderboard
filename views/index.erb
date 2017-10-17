@@ -1,0 +1,16 @@
+<html>
+    <head>
+        <title>Hacktoberfest leaderboard</title>
+    </head>
+    <body>
+        <h1>Hello Hacktoberfest world !!!</h1>
+        <h2>Participant list</h2>
+        <% for member in leaderboard.members do %>
+            <a href="<%=member.profile%>">
+                <img height=44 width=44 src="<%=member.avatar%>"/><%=member.username%>
+            </a>
+            Contributions: <%= leaderboard.member_contributions(member.username).size %>
+            <br/>
+        <% end %>
+    </body>
+</html>
