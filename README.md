@@ -9,6 +9,7 @@ Happy coding
 
 ## How to test localy
 The application is written in `Ruby`, using the [Sinatra](http://www.sinatrarb.com/) framework.
+> Need to learn Ruby ? Visit [Rubymonk](https://rubymonk.com/)
 ### Setup dev environment
 First, you need to install an `ruby` interpretter, alongside with the `gem` ruby package management tool.
 Visit [Ruby language website](https://www.ruby-lang.org) for more details.
