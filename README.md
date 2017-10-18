@@ -28,3 +28,7 @@ Run
     bundle exec ruby leaderboard.rb
 ```
 then browse to http://localhost
+
+### Usefull documents
+* [Sinatra usage](http://www.sinatrarb.com/intro.html)
+* [Github_api usage](https://github.com/piotrmurach/github)
