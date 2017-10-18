@@ -37,7 +37,7 @@ class Leaderboard
 
   # Retrieve list of user's pull requests from github
   def member_contributions(username)
-    query = "created:#{@event_date} author:#{username}"
+    query = "created:#{@event_date} author:#{username} -label:invalid"
     contribs = @github.search.issues(query)
     contribs.body.items.reject { |i| i.pull_request.nil? }
   end
