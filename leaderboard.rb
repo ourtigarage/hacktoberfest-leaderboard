@@ -3,7 +3,7 @@ require 'net/http'
 require 'github_api'
 
 PARTICIPANT_FILE = 'https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants.md'.freeze
-EVENT_DATE = '2017-10-01'.freeze
+EVENT_DATE = '2017-10'.freeze
 
 # The leaderboard root class
 class Leaderboard
@@ -31,7 +31,7 @@ class Leaderboard
 
   # Retrieve list of user's pull requests from github
   def member_contributions(username)
-    query = "created:>#{EVENT_DATE} author:#{username}"
+    query = "created:#{EVENT_DATE} author:#{username}"
     contribs = @github.search.issues(query)
     contribs.body.items.reject { |i| i.pull_request.nil? }
   end
