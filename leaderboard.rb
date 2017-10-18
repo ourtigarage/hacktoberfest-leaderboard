@@ -22,13 +22,14 @@ class Leaderboard
                 .uniq
   end
 
-  # Build a list of members with additional data
+  # Build a list of members with additional data from github
   def members
     members_names.map { |m| get_user_from_github m }
                  .reject(&:nil?)
                  .map { |u| Member.new u }
   end
 
+  # Retrieve list of user's pull requests from github
   def member_contributions(username)
     query = "created:>#{EVENT_DATE} author:#{username}"
     contribs = @github.search.issues(query)
