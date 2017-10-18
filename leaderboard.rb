@@ -5,9 +5,15 @@ require 'github_api'
 PARTICIPANT_FILE = 'https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants.md'.freeze
 EVENT_DATE = '2017-10'.freeze
 
-# The leaderboard root class
+# The leaderboard root class, where the magic happen
 class Leaderboard
-  def initialize
+  # Initialize the leaderboard for the given event date and participant file URL
+  def initialize(event_date, participants_file_url)
+    @file_uri = URI(participants_file_url)
+    @event_date = event_date
+    # Conect to github using a token from env variable.
+    # If no token is set, no problem it will still work,
+    # but with limited rate for API calls
     @github = Github.new oauth_token: ENV['GH_TOKEN']
   end
 
@@ -31,7 +37,7 @@ class Leaderboard
 
   # Retrieve list of user's pull requests from github
   def member_contributions(username)
-    query = "created:#{EVENT_DATE} author:#{username}"
+    query = "created:#{@event_date} author:#{username}"
     contribs = @github.search.issues(query)
     contribs.body.items.reject { |i| i.pull_request.nil? }
   end
@@ -46,7 +52,7 @@ class Leaderboard
 
   def members_file
     # Get member file at https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants.md
-    uri = URI(PARTICIPANT_FILE)
+    uri = @file_uri
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = uri.scheme == 'https'
     resp = http.get(uri.path)
@@ -59,6 +65,7 @@ end
 class Member
   attr_reader :username, :fullname, :avatar, :profile
 
+  # Construct a user from data fetched from github
   def initialize(github_user)
     @username = github_user.login
     @fullname = github_user.name
@@ -76,8 +83,8 @@ class Member
   end
 end
 
-# Initialize the laderboard
-leaderboard = Leaderboard.new
+# Initialize the leaderboard
+leaderboard = Leaderboard.new EVENT_DATE, PARTICIPANT_FILE
 
 # Set listenning port from env variable, or fallback to 80 as default
 set :port, (ENV['PORT'] || 80).to_i
@@ -89,5 +96,6 @@ get '/' do
 end
 
 get '/api/members' do
+  content_type :json
   leaderboard.members.to_json
 end
