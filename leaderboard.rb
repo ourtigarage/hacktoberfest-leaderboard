@@ -32,7 +32,7 @@ class Leaderboard
   def members
     members_names.map { |m| get_user_from_github m }
                  .reject(&:nil?)
-                 .map { |u| Member.new u }
+                 .map { |u| Member.new u, self }
   end
 
   # Retrieve list of user's pull requests from github
@@ -66,11 +66,19 @@ class Member
   attr_reader :username, :fullname, :avatar, :profile
 
   # Construct a user from data fetched from github
-  def initialize(github_user)
+  def initialize(github_user, leaderboard)
     @username = github_user.login
     @fullname = github_user.name
     @avatar = github_user.avatar_url
     @profile = github_user.html_url
+    @leaderboard = leaderboard
+    @contribs = nil
+  end
+
+  # List member's contributions for the event month
+  def month_contributions
+    # Query contributions only if not already done
+    @contribs ||= @leaderboard.member_contributions(@username)
   end
 
   def to_json(*_opts)
