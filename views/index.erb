@@ -13,7 +13,7 @@
 			<h1>Hello Hacktoberfest world !!!</h1>
 			<div class="subPart">
 				<h2>Leaderboard</h2>
-				<% for member in leaderboard.members do %>
+				<% for member in leaderboard.members.sort_by{ |m| -m.month_contributions.size } do %>
 				<div class="member">
 					<a href="<%=member.profile%>">
 						<figure class="avatar avatar-xl" data-initial="YZ">
@@ -21,7 +21,7 @@
 						</figure>
 					<%=member.username%>
 					</a>
-					Contributions: <%= leaderboard.member_contributions(member.username).size %>
+					Contributions: <%= member.month_contributions.size %>
 					<br/>
 				</div>
 				<% end %>
