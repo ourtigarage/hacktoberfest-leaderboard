@@ -30,5 +30,5 @@ Run
 then browse to http://localhost
 
 ### Useful documents
-* [Sinatra usage](http://www.sinatrarb.com/intro.html)
-* [Github_api usage](https://github.com/piotrmurach/github)
+* [Sinatra usage](http://www.sinatrarb.com/intro.html) (Web microframework)
+* [Octokit usage](http://www.rubydoc.info/gems/octokit/) (github api library)

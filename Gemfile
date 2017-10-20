@@ -1,5 +1,5 @@
 source 'https://rubygems.org' do
-  gem 'github_api'
   gem 'json'
+  gem 'octokit'
   gem 'sinatra'
 end

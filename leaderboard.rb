@@ -1,6 +1,6 @@
 require 'sinatra'
 require 'net/http'
-require 'github_api'
+require 'octokit'
 
 PARTICIPANT_FILE = 'https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants.md'.freeze
 EVENT_DATE = '2017-10'.freeze
@@ -14,7 +14,7 @@ class Leaderboard
     # Connect to GitHub using a token from env variable.
     # If no token is set, no problem it will still work,
     # but with a limited rate for API calls
-    @github = Github.new oauth_token: ENV['GH_TOKEN']
+    @github = Octokit::Client.new access_token: ENV['GH_TOKEN']
   end
 
   # Retrieve the list of participants from GitHub page
@@ -38,15 +38,15 @@ class Leaderboard
   # Retrieve list of user's pull requests from github
   def member_contributions(username)
     query = "created:#{@event_date} author:#{username} -label:invalid"
-    contribs = @github.search.issues(query)
-    contribs.body.items.reject { |i| i.pull_request.nil? }
+    contribs = @github.search_issues(query)
+    contribs.items.reject { |i| i.pull_request.nil? }
   end
 
   private
 
   def get_user_from_github(username)
-    @github.users.get user: username
-  rescue Github::Error::NotFound
+    @github.user username
+  rescue Octokit::NotFound
     nil
   end
 
