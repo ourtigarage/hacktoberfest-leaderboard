@@ -5,19 +5,19 @@ require 'github_api'
 PARTICIPANT_FILE = 'https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants.md'.freeze
 EVENT_DATE = '2017-10'.freeze
 
-# The leaderboard root class, where the magic happen
+# The leaderboard root class, where the magic happens
 class Leaderboard
   # Initialize the leaderboard for the given event date and participant file URL
   def initialize(event_date, participants_file_url)
     @file_uri = URI(participants_file_url)
     @event_date = event_date
-    # Conect to github using a token from env variable.
+    # Connect to GitHub using a token from env variable.
     # If no token is set, no problem it will still work,
-    # but with limited rate for API calls
+    # but with a limited rate for API calls
     @github = Github.new oauth_token: ENV['GH_TOKEN']
   end
 
-  # Retrieve the list of participants from github page
+  # Retrieve the list of participants from GitHub page
   def members_names
     # Extract usernames from file
     members_file.lines
@@ -28,7 +28,7 @@ class Leaderboard
                 .uniq
   end
 
-  # Build a list of members with additional data from github
+  # Build a list of members with additional data from GitHub
   def members
     members_names.map { |m| get_user_from_github m }
                  .reject(&:nil?)
@@ -65,7 +65,7 @@ end
 class Member
   attr_reader :username, :fullname, :avatar, :profile
 
-  # Construct a user from data fetched from github
+  # Construct a user using the data fetched from GitHub
   def initialize(github_user, leaderboard)
     @username = github_user.login
     @fullname = github_user.name
@@ -94,7 +94,7 @@ end
 # Initialize the leaderboard
 leaderboard = Leaderboard.new EVENT_DATE, PARTICIPANT_FILE
 
-# Set listenning port from env variable, or fallback to 80 as default
+# Set listening port from env variable, or fallback to 80 as default
 set :port, (ENV['PORT'] || 80).to_i
 # Set the static web content directory
 set :public_folder, File.dirname(__FILE__) + '/static'
