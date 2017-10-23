@@ -1,1 +1,1 @@
-web: bundle exec ruby leaderboard.rb
+web: bundle exec ruby server.rb

@@ -1,9 +1,9 @@
-require 'sinatra'
+require 'concurrent'
+require 'json'
 require 'net/http'
 require 'octokit'
 
-PARTICIPANT_FILE = 'https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants.md'.freeze
-EVENT_DATE = '2017-10'.freeze
+include Concurrent
 
 # The leaderboard root class, where the magic happens
 class Leaderboard
@@ -30,9 +30,11 @@ class Leaderboard
 
   # Build a list of members with additional data from GitHub
   def members
-    members_names.map { |m| get_user_from_github m }
+    members_names.map { |m| Future.execute { get_user_from_github m } }
+                 .map(&:value)
                  .reject(&:nil?)
-                 .map { |u| Member.new u, self }
+                 .map { |u| Future.execute { Member.new u, self } }
+                 .map(&:value)
   end
 
   # Retrieve list of user's pull requests from github
@@ -71,14 +73,15 @@ class Member
     @fullname = github_user.name
     @avatar = github_user.avatar_url
     @profile = github_user.html_url
-    @leaderboard = leaderboard
-    @contribs = nil
+    # @leaderboard = leaderboard
+    @contribs = leaderboard.member_contributions(@username)
   end
 
   # List member's contributions for the event month
   def month_contributions
     # Query contributions only if not already done
-    @contribs ||= @leaderboard.member_contributions(@username)
+    # @contribs ||= @leaderboard.member_contributions(@username)
+    @contribs
   end
 
   # Check if the user has completed the challenge
@@ -88,7 +91,7 @@ class Member
 
   # Returns the completion percentage
   def challenge_completion
-    [100, ((contributions_count.to_f / 4.0)*100).to_i].min
+    [100, ((contributions_count.to_f / 4.0) * 100).to_i].min
   end
 
   # Count the number of valid contributions
@@ -104,21 +107,4 @@ class Member
       profile: @profile
     }.to_json
   end
-end
-
-# Initialize the leaderboard
-leaderboard = Leaderboard.new EVENT_DATE, PARTICIPANT_FILE
-
-# Set listening port from env variable, or fallback to 80 as default
-set :port, (ENV['PORT'] || 80).to_i
-# Set the static web content directory
-set :public_folder, File.dirname(__FILE__) + '/static'
-
-get '/' do
-  erb :index, locals: { leaderboard: leaderboard }
-end
-
-get '/api/members' do
-  content_type :json
-  leaderboard.members.to_json
 end
