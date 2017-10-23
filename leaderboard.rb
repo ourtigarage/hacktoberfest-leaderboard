@@ -26,8 +26,8 @@ class Leaderboard
                    .map { |l| l.match(/^\* .*@([a-zA-Z0-9]+).*$/) }
                    .reject(&:nil?)
                    .map { |m| m[1] }
-                   .uniq
                    .to_a
+                   .uniq
   end
 
   # Build a list of members with additional data from GitHub
