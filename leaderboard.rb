@@ -20,7 +20,8 @@ class Leaderboard
   # Retrieve the list of participants from GitHub page
   def members_names
     # Extract usernames from file
-    open(@file_uri).lines
+    open(@file_uri).each_line
+                   .lazy
                    .map(&:strip)
                    .map { |l| l.match(/^\* .*@([a-zA-Z0-9]+).*$/) }
                    .reject(&:nil?)
@@ -38,7 +39,6 @@ class Leaderboard
                  .map { |u| Future.execute { Member.new(u, self) } }
                  .each { |f| raise f.reason if !f.value && f.rejected? }
                  .map(&:value)
-                 .each{|p| puts p}
   end
 
   # Retrieve list of user's pull requests from github
