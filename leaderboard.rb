@@ -81,6 +81,21 @@ class Member
     @contribs ||= @leaderboard.member_contributions(@username)
   end
 
+  # Check if the user has completed the challenge
+  def challenge_complete?
+    month_contributions.size >= 4
+  end
+
+  # Returns the completion percentage
+  def challenge_completion
+    [100, ((contributions_count.to_f / 4.0)*100).to_i].min
+  end
+
+  # Count the number of valid contributions
+  def contributions_count
+    month_contributions.size
+  end
+
   def to_json(*_opts)
     {
       username: @username,
