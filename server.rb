@@ -1,3 +1,4 @@
+require 'erubis'
 require 'json'
 require 'sinatra'
 require_relative 'leaderboard'
