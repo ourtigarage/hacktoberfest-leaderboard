@@ -1,7 +1,7 @@
 require 'concurrent'
 require 'json'
-require 'net/http'
 require 'octokit'
+require 'open-uri'
 
 include Concurrent
 
@@ -20,21 +20,25 @@ class Leaderboard
   # Retrieve the list of participants from GitHub page
   def members_names
     # Extract usernames from file
-    members_file.lines
-                .map(&:strip)
-                .map { |l| l.match(/^\* .*@([a-zA-Z0-9]+).*$/) }
-                .reject(&:nil?)
-                .map { |m| m[1] }
-                .uniq
+    open(@file_uri).lines
+                   .map(&:strip)
+                   .map { |l| l.match(/^\* .*@([a-zA-Z0-9]+).*$/) }
+                   .reject(&:nil?)
+                   .map { |m| m[1] }
+                   .uniq
+                   .to_a
   end
 
   # Build a list of members with additional data from GitHub
   def members
     members_names.map { |m| Future.execute { get_user_from_github m } }
+                 .each { |f| raise f.reason if !f.value && f.rejected? }
                  .map(&:value)
                  .reject(&:nil?)
-                 .map { |u| Future.execute { Member.new u, self } }
+                 .map { |u| Future.execute { Member.new(u, self) } }
+                 .each { |f| raise f.reason if !f.value && f.rejected? }
                  .map(&:value)
+                 .each{|p| puts p}
   end
 
   # Retrieve list of user's pull requests from github
@@ -50,16 +54,6 @@ class Leaderboard
     @github.user username
   rescue Octokit::NotFound
     nil
-  end
-
-  def members_file
-    # Get member file at https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants.md
-    uri = @file_uri
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = uri.scheme == 'https'
-    resp = http.get(uri.path)
-    resp.value
-    resp.body
   end
 end
 
