@@ -10,12 +10,28 @@ ORG_URL = 'https://api.github.com/repos/ourtigarage'.freeze
 SNAKE_URL = "#{ORG_URL}/web-snake".freeze
 LEADERBOARD_URL = "#{ORG_URL}/hacktoberfest-leaderboard".freeze
 
+# Class reprensenting a badge a player can earn
+class Badge
+  attr_reader :short, :title, :description
+
+  def initialize(short, title, description, &block)
+    @short = short
+    @title = title
+    @description = description
+    @block = block
+  end
+
+  def earned_by?(player)
+    @block.call(player)
+  end
+end
+
 BADGES = [
-  ['medal', :challenge_complete?, 'Completed hacktoberfest', 'The player completed the hacktoberfest challenge by submitting 4 pull requests'],
-  ['snake', :contributed_to_snake?, 'Snake charmer', 'The player submitted at least 1 PR to the snake game'],
-  ['leaderboard', :contributed_to_leaderboard?, 'Leaderboard contributor', 'The player submitted at least 1 PR to the leaderboard code'],
-  ['10-contributions', :ten_contributions?, 'Pull Request champion', 'The player submitted more than 10 Pull requests'],
-  ['adventure', :contributed_out_of_org?, 'Adventurer', 'The player submitted at least 1 PR to a repository out of "ourtigarage" organisation']
+  Badge.new('medal', 'Completed hacktoberfest', 'The player completed the hacktoberfest challenge by submitting 4 pull requests', &:challenge_complete?),
+  Badge.new('snake', 'Snake charmer', 'The player submitted at least 1 PR to the snake game', &:contributed_to_snake?),
+  Badge.new('leaderboard', 'Leaderboard contributor', 'The player submitted at least 1 PR to the leaderboard code', &:contributed_to_leaderboard?),
+  Badge.new('10-contributions', 'Pull Request champion', 'The player submitted more than 10 Pull requests', &:ten_contributions?),
+  Badge.new('adventure', 'Adventurer', 'The player submitted at least 1 PR to a repository out of "ourtigarage" organisation', &:contributed_out_of_org?)
 ].freeze
 
 # The leaderboard root class, where the magic happens
@@ -136,7 +152,7 @@ class Member
   end
 
   def badges
-    BADGES.select {|b| send(b[1]) }
+    BADGES.select { |b| b.earned_by?(self) }
   end
 
   def to_json(*_opts)

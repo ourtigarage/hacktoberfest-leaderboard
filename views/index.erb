@@ -41,15 +41,15 @@
 									<% for badge in member.badges %>
 										<div class="popover popover-right">
 											<figure class="avatar avatar-xl">
-												<img src="img/<%=badge[0]%>.png" alt="<%=badge[0]%>">
+												<img src="img/<%=badge.short%>.png" alt="<%=badge.short%>">
 											</figure>
 											<div class="popover-container">
 												<div class="card">
 													<div class="card-header">
-														<div class="text-large text-bold"><%=badge[2]%></div>
+														<div class="text-large text-bold"><%=badge.title%></div>
 													</div>
 													<div class="card-body">
-														<%=badge[3]%>
+														<%=badge.description%>
 													</div>
 												</div>
 											</div>
