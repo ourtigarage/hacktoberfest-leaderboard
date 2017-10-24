@@ -6,6 +6,36 @@ require 'open-uri'
 
 include Concurrent
 
+ORG_URL = 'https://api.github.com/repos/ourtigarage'.freeze
+SNAKE_URL = "#{ORG_URL}/web-snake".freeze
+LEADERBOARD_URL = "#{ORG_URL}/hacktoberfest-leaderboard".freeze
+
+# Class reprensenting a badge a player can earn
+class Badge
+  attr_reader :short, :title, :description
+
+  def initialize(short, title, description, &block)
+    @short = short
+    @title = title
+    @description = description
+    @block = block
+  end
+
+  def earned_by?(player)
+    @block.call(player)
+  end
+end
+
+BADGES = [
+  Badge.new('medal', 'Completed hacktoberfest', 'The player completed the hacktoberfest challenge by submitting 4 pull requests', &:challenge_complete?),
+  Badge.new('snake', 'Snake charmer', 'The player submitted at least 1 PR to the snake game', &:contributed_to_snake?),
+  Badge.new('leaderboard', 'Leaderboard contributor', 'The player submitted at least 1 PR to the leaderboard code', &:contributed_to_leaderboard?),
+  Badge.new('10-contributions', 'Pull Request champion', 'The player submitted more than 10 Pull requests', &:ten_contributions?),
+  Badge.new('adventure', 'Adventurer', 'The player submitted at least 1 PR to a repository out of "ourtigarage" organisation', &:contributed_out_of_org?),
+  Badge.new('novelist', 'The novelist', 'Wrote more than 100 words in a Pull Request\'s description', &:contribution_with_100_words?),
+  Badge.new('taciturn', 'The taciturn', 'Submitted a Pul Request with no description', &:contribution_with_no_word?)
+].freeze
+
 # The leaderboard root class, where the magic happens
 class Leaderboard
   # Initialize the leaderboard for the given event date and participant file URL
@@ -24,7 +54,7 @@ class Leaderboard
     end
   end
 
-  # Retrieve the list of participants from GitHub page
+  # Retrieve the list of participants names from GitHub page
   def members_names
     # Extract usernames from file
     open(@file_uri).each_line
@@ -39,6 +69,8 @@ class Leaderboard
   end
 
   # Build a list of members with additional data from GitHub
+  # Those data are user info like name, link to avatar and profiles
+  # and the list of contributions during the hacktoberfest's month
   def members
     members_data(members_names).values
                                .map { |user| Member.new(*user) }
@@ -103,6 +135,34 @@ class Member
   # Count the number of valid contributions
   def contributions_count
     contributions.size
+  end
+
+  def contributed_to_snake?
+    contributions.any? { |c| c.repository_url == SNAKE_URL }
+  end
+
+  def contributed_to_leaderboard?
+    contributions.any? { |c| c.repository_url == LEADERBOARD_URL }
+  end
+
+  def ten_contributions?
+    contributions.size >= 10
+  end
+
+  def contributed_out_of_org?
+    contributions.any? { |c| !c.repository_url.start_with? ORG_URL }
+  end
+
+  def contribution_with_100_words?
+    contributions.any? { |c| c.body.split(' ').count >= 100 }
+  end
+
+  def contribution_with_no_word?
+    contributions.any? { |c| c.body.strip.empty? }
+  end
+
+  def badges
+    BADGES.select { |b| b.earned_by?(self) }
   end
 
   def to_json(*_opts)
