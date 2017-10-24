@@ -6,6 +6,18 @@ require 'open-uri'
 
 include Concurrent
 
+ORG_URL = 'https://api.github.com/repos/ourtigarage'.freeze
+SNAKE_URL = "#{ORG_URL}/web-snake".freeze
+LEADERBOARD_URL = "#{ORG_URL}/hacktoberfest-leaderboard".freeze
+
+BADGES = [
+  ['medal', :challenge_complete?, 'Completed hacktoberfest', 'The player completed the hacktoberfest challenge by submitting 4 pull requests'],
+  ['snake', :contributed_to_snake?, 'Snake charmer', 'The player submitted at least 1 PR to the snake game'],
+  ['leaderboard', :contributed_to_leaderboard?, 'Leaderboard contributor', 'The player submitted at least 1 PR to the leaderboard code'],
+  ['10-contributions', :ten_contributions?, 'Pull Request champion', 'The player submitted more than 10 Pull requests'],
+  ['adventure', :contributed_out_of_org?, 'Adventurer', 'The player submitted at least 1 PR to a repository out of "ourtigarage" organisation']
+].freeze
+
 # The leaderboard root class, where the magic happens
 class Leaderboard
   # Initialize the leaderboard for the given event date and participant file URL
@@ -24,7 +36,7 @@ class Leaderboard
     end
   end
 
-  # Retrieve the list of participants from GitHub page
+  # Retrieve the list of participants names from GitHub page
   def members_names
     # Extract usernames from file
     open(@file_uri).each_line
@@ -39,6 +51,8 @@ class Leaderboard
   end
 
   # Build a list of members with additional data from GitHub
+  # Those data are user info like name, link to avatar and profiles
+  # and the list of contributions during the hacktoberfest's month
   def members
     members_data(members_names).values
                                .map { |user| Member.new(*user) }
@@ -103,6 +117,26 @@ class Member
   # Count the number of valid contributions
   def contributions_count
     contributions.size
+  end
+
+  def contributed_to_snake?
+    contributions.any? { |c| c.repository_url == SNAKE_URL }
+  end
+
+  def contributed_to_leaderboard?
+    contributions.any? { |c| c.repository_url == LEADERBOARD_URL }
+  end
+
+  def ten_contributions?
+    contributions.size >= 10
+  end
+
+  def contributed_out_of_org?
+    contributions.any? { |c| !c.repository_url.start_with? ORG_URL }
+  end
+
+  def badges
+    BADGES.select {|b| send(b[1]) }
   end
 
   def to_json(*_opts)

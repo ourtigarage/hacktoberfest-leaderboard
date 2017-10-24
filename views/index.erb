@@ -36,6 +36,26 @@
 										<%=member.contributions_count%>/4
 									</div>
 								</div></td>
+								<td>
+									<!-- List of badges earned -->
+									<% for badge in member.badges %>
+										<div class="popover popover-right">
+											<figure class="avatar avatar-xl">
+												<img src="img/<%=badge[0]%>.png" alt="<%=badge[0]%>">
+											</figure>
+											<div class="popover-container">
+												<div class="card">
+													<div class="card-header">
+														<div class="text-large text-bold"><%=badge[2]%></div>
+													</div>
+													<div class="card-body">
+														<%=badge[3]%>
+													</div>
+												</div>
+											</div>
+										</div>
+									<% end %>
+								</td>
 							</tr>
 						<% end %>
 					</tbody>
