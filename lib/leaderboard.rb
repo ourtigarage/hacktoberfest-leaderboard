@@ -27,13 +27,13 @@ class Badge
 end
 
 BADGES = [
-  Badge.new('medal', 'Completed hacktoberfest', 'The player completed the hacktoberfest challenge by submitting 4 pull requests', &:challenge_complete?),
-  Badge.new('snake', 'Snake charmer', 'The player submitted at least 1 PR to the snake game', &:contributed_to_snake?),
-  Badge.new('leaderboard', 'Leaderboard contributor', 'The player submitted at least 1 PR to the leaderboard code', &:contributed_to_leaderboard?),
-  Badge.new('10-contributions', 'Pull Request champion', 'The player submitted more than 10 Pull requests', &:ten_contributions?),
-  Badge.new('adventure', 'Adventurer', 'The player submitted at least 1 PR to a repository out of "ourtigarage" organisation', &:contributed_out_of_org?),
+  Badge.new('hacktoberfest', 'Hacktoberfest completed', 'Completed the hacktoberfest challenge by submitting 4 pull requests', &:challenge_complete?),
+  Badge.new('snake', 'The snake charmer', 'Submitted 1 Pull Request to the <a href="https://ourtigarage.github.io/web-snake/">snake game</a>\'s code repository', &:contributed_to_snake?),
+  Badge.new('leaderboard', 'The leaderboard contributor', 'Submitted 1 Pull Request to this leaderboard\'s code repository', &:contributed_to_leaderboard?),
+  Badge.new('10-contributions', 'The Pull Request champion', 'Submitted more than 10 Pull requests', &:ten_contributions?),
+  Badge.new('adventure', 'The adventurer', 'Submitted 1 Pull Request to a repository out of <a href="https://github.com/ourtigarage">ourtigarage</a> organisation', &:contributed_out_of_org?),
   Badge.new('novelist', 'The novelist', 'Wrote more than 100 words in a Pull Request\'s description', &:contribution_with_100_words?),
-  Badge.new('taciturn', 'The taciturn', 'Submitted a Pul Request with no description', &:contribution_with_no_word?)
+  Badge.new('taciturn', 'The taciturn', 'Submitted a Pull Request with no description', &:contribution_with_no_word?)
 ].freeze
 
 # The leaderboard root class, where the magic happens
