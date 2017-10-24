@@ -31,7 +31,9 @@ BADGES = [
   Badge.new('snake', 'Snake charmer', 'The player submitted at least 1 PR to the snake game', &:contributed_to_snake?),
   Badge.new('leaderboard', 'Leaderboard contributor', 'The player submitted at least 1 PR to the leaderboard code', &:contributed_to_leaderboard?),
   Badge.new('10-contributions', 'Pull Request champion', 'The player submitted more than 10 Pull requests', &:ten_contributions?),
-  Badge.new('adventure', 'Adventurer', 'The player submitted at least 1 PR to a repository out of "ourtigarage" organisation', &:contributed_out_of_org?)
+  Badge.new('adventure', 'Adventurer', 'The player submitted at least 1 PR to a repository out of "ourtigarage" organisation', &:contributed_out_of_org?),
+  Badge.new('novelist', 'The novelist', 'Wrote more than 100 words in a Pull Request\'s description', &:contribution_with_100_words?),
+  Badge.new('taciturn', 'The taciturn', 'Submitted a Pul Request with no description', &:contribution_with_no_word?)
 ].freeze
 
 # The leaderboard root class, where the magic happens
@@ -149,6 +151,14 @@ class Member
 
   def contributed_out_of_org?
     contributions.any? { |c| !c.repository_url.start_with? ORG_URL }
+  end
+
+  def contribution_with_100_words?
+    contributions.any? { |c| c.body.split(' ').count >= 100 }
+  end
+
+  def contribution_with_no_word?
+    contributions.any? { |c| c.body.strip.empty? }
   end
 
   def badges
