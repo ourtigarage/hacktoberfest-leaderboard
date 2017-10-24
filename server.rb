@@ -1,7 +1,7 @@
 require 'erubis'
 require 'json'
 require 'sinatra'
-require_relative 'leaderboard'
+require_relative 'lib/leaderboard'
 
 PARTICIPANT_FILE = 'https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants.md'.freeze
 EVENT_DATE = '2017-10'.freeze

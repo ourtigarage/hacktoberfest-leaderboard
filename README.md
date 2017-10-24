@@ -23,9 +23,14 @@ Download `bundler` by running
 > If you're running behind a proxy, you'll need to set both environment variables `HTTP_PROXY` and `HTTPS_PROXY`
 
 ### Running the app locally
-Run
+On first run, you need to execute
 ```bash
-    bundle exec ruby leaderboard.rb
+    bundle install
+```
+
+Then start the application by running
+```bash
+    bundle exec ruby server.rb
 ```
 then browse to http://localhost
 

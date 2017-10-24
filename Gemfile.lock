@@ -7,6 +7,8 @@ GEM
     erubis (2.7.0)
     faraday (0.12.2)
       multipart-post (>= 1.2, < 3)
+    faraday-http-cache (2.0.0)
+      faraday (~> 0.8)
     json (2.0.4)
     multipart-post (2.0.0)
     mustermann (1.0.1)
@@ -32,6 +34,7 @@ PLATFORMS
 DEPENDENCIES
   concurrent-ruby!
   erubis!
+  faraday-http-cache!
   json!
   octokit!
   sinatra!

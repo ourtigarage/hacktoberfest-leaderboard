@@ -1,4 +1,5 @@
 require 'concurrent'
+require 'faraday-http-cache'
 require 'json'
 require 'octokit'
 require 'open-uri'
@@ -15,6 +16,14 @@ class Leaderboard
     # If no token is set, no problem it will still work,
     # but with a limited rate for API calls
     @github = Octokit::Client.new access_token: ENV['GH_TOKEN']
+    stack = Faraday::RackBuilder.new do |builder|
+      # builder.response :logger # Used for debugging requests
+      builder.use Faraday::HttpCache, serializer: Marshal, shared_cache: false
+      builder.use Octokit::Response::RaiseError
+      builder.adapter Faraday.default_adapter
+    end
+    @github.middleware = stack
+    @github.auto_paginate = true # Use to concatenate all results
   end
 
   # Retrieve the list of participants from GitHub page
@@ -32,13 +41,10 @@ class Leaderboard
 
   # Build a list of members with additional data from GitHub
   def members
-    members_names.map { |m| Future.execute { get_user_from_github m } }
+    members_names.map { |m| Future.execute { get_member_from_github m } }
                  .each { |f| raise f.reason if !f.value && f.rejected? }
                  .map(&:value)
                  .reject(&:nil?)
-                 .map { |u| Future.execute { Member.new(u, self) } }
-                 .each { |f| raise f.reason if !f.value && f.rejected? }
-                 .map(&:value)
   end
 
   # Retrieve list of user's pull requests from github
@@ -50,8 +56,8 @@ class Leaderboard
 
   private
 
-  def get_user_from_github(username)
-    @github.user username
+  def get_member_from_github(username)
+    Member.new @github.user(username), member_contributions(username)
   rescue Octokit::NotFound
     nil
   end
@@ -62,13 +68,13 @@ class Member
   attr_reader :username, :fullname, :avatar, :profile
 
   # Construct a user using the data fetched from GitHub
-  def initialize(github_user, leaderboard)
+  def initialize(github_user, contributions)
     @username = github_user.login
     @fullname = github_user.name
     @avatar = github_user.avatar_url
     @profile = github_user.html_url
     # @leaderboard = leaderboard
-    @contribs = leaderboard.member_contributions(@username)
+    @contribs = contributions
   end
 
   # List member's contributions for the event month
@@ -96,9 +102,16 @@ class Member
   def to_json(*_opts)
     {
       username: @username,
-      fullname: @fulname,
+      fullname: @fullname,
       avatar: @avatar,
       profile: @profile
     }.to_json
   end
 end
+
+# stack = Faraday::RackBuilder.new do |builder|
+#   builder.response :logger
+#   builder.use Octokit::Response::RaiseError
+#   builder.adapter Faraday.default_adapter
+# end
+# Octokit.middleware = stack
