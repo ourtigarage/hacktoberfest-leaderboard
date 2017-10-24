@@ -16,14 +16,12 @@ class Leaderboard
     # If no token is set, no problem it will still work,
     # but with a limited rate for API calls
     @github = Octokit::Client.new access_token: ENV['GH_TOKEN']
-    stack = Faraday::RackBuilder.new do |builder|
-      # builder.response :logger # Used for debugging requests
+    @github.auto_paginate = true # Use to concatenate all results
+    @github.middleware = Faraday::RackBuilder.new do |builder|
       builder.use Faraday::HttpCache, serializer: Marshal, shared_cache: false
       builder.use Octokit::Response::RaiseError
       builder.adapter Faraday.default_adapter
     end
-    @github.middleware = stack
-    @github.auto_paginate = true # Use to concatenate all results
   end
 
   # Retrieve the list of participants from GitHub page
@@ -35,29 +33,46 @@ class Leaderboard
                    .map { |l| l.match(/^\* .*@([a-zA-Z0-9]+).*$/) }
                    .reject(&:nil?)
                    .map { |m| m[1] }
+                   .reject { |name| name == 'username' }
                    .to_a
                    .uniq
   end
 
   # Build a list of members with additional data from GitHub
   def members
-    members_names.map { |m| Future.execute { get_member_from_github m } }
-                 .each { |f| raise f.reason if !f.value && f.rejected? }
-                 .map(&:value)
-                 .reject(&:nil?)
-  end
-
-  # Retrieve list of user's pull requests from github
-  def member_contributions(username)
-    query = "created:#{@event_date} author:#{username} -label:invalid"
-    contribs = @github.search_issues(query)
-    contribs.items.reject { |i| i.pull_request.nil? }
+    members_data(members_names).values
+                               .map { |user| Member.new(*user) }
   end
 
   private
 
+  def query_users_data(usernames)
+    authors = usernames.map { |n| "author:#{n}" }.join ' '
+    query_filter = "is:pr #{authors} created:#{@event_date} -label:invalid"
+    @github.search_issues(query_filter)
+           .items
+           .each_with_object({}) { |e, acc| (acc[e.user.login] ||= [e.user, []])[1] << e }
+  end
+
+  def query_missing_users_data(usernames, data)
+    usernames.reject { |name| data.include? name }
+             .map { |u| Future.execute { get_member_from_github u } }
+             .each { |f| raise f.reason if !f.value && f.rejected? }
+             .map(&:value)
+             .reject(&:nil?)
+  end
+
+  def add_missing_users(usernames, data)
+    query_missing_users_data(usernames, data)
+      .each_with_object(data) { |e, acc| add_user(acc, e) }
+  end
+
+  def members_data(usernames)
+    add_missing_users(usernames, query_users_data(usernames))
+  end
+
   def get_member_from_github(username)
-    Member.new @github.user(username), member_contributions(username)
+    @github.user(username)
   rescue Octokit::NotFound
     nil
   end
@@ -65,28 +80,19 @@ end
 
 # A contest member from the participant list in landing page
 class Member
-  attr_reader :username, :fullname, :avatar, :profile
+  attr_reader :username, :avatar, :profile, :contributions
 
   # Construct a user using the data fetched from GitHub
   def initialize(github_user, contributions)
     @username = github_user.login
-    @fullname = github_user.name
     @avatar = github_user.avatar_url
     @profile = github_user.html_url
-    # @leaderboard = leaderboard
-    @contribs = contributions
-  end
-
-  # List member's contributions for the event month
-  def month_contributions
-    # Query contributions only if not already done
-    # @contribs ||= @leaderboard.member_contributions(@username)
-    @contribs
+    @contributions = contributions
   end
 
   # Check if the user has completed the challenge
   def challenge_complete?
-    month_contributions.size >= 4
+    contributions.size >= 4
   end
 
   # Returns the completion percentage
@@ -96,22 +102,14 @@ class Member
 
   # Count the number of valid contributions
   def contributions_count
-    month_contributions.size
+    contributions.size
   end
 
   def to_json(*_opts)
     {
       username: @username,
-      fullname: @fullname,
       avatar: @avatar,
       profile: @profile
     }.to_json
   end
 end
-
-# stack = Faraday::RackBuilder.new do |builder|
-#   builder.response :logger
-#   builder.use Octokit::Response::RaiseError
-#   builder.adapter Faraday.default_adapter
-# end
-# Octokit.middleware = stack
