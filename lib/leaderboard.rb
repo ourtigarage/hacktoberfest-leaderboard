@@ -5,10 +5,11 @@ require 'octokit'
 require 'open-uri'
 
 include Concurrent
-
-ORG_URL = 'https://api.github.com/repos/ourtigarage'.freeze
-SNAKE_URL = "#{ORG_URL}/web-snake".freeze
-LEADERBOARD_URL = "#{ORG_URL}/hacktoberfest-leaderboard".freeze
+BASE_API_URL = 'https://api.github.com'.freeze
+BASE_REPOS_URL = "#{BASE_API_URL}/repos".freeze
+ORG_REPOS_URL = "#{BASE_REPOS_URL}/ourtigarage".freeze
+SNAKE_URL = "#{ORG_REPOS_URL}/web-snake".freeze
+LEADERBOARD_URL = "#{ORG_REPOS_URL}/hacktoberfest-leaderboard".freeze
 
 # Class reprensenting a badge a player can earn
 class Badge
@@ -31,9 +32,10 @@ BADGES = [
   Badge.new('snake', 'The snake charmer', 'Submitted 1 Pull Request to the <a href="https://ourtigarage.github.io/web-snake/">snake game</a>\'s code repository', &:contributed_to_snake?),
   Badge.new('leaderboard', 'The leaderboard contributor', 'Submitted 1 Pull Request to this leaderboard\'s code repository', &:contributed_to_leaderboard?),
   Badge.new('10-contributions', 'The Pull Request champion', 'Submitted more than 10 Pull requests', &:ten_contributions?),
-  Badge.new('adventure', 'The adventurer', 'Submitted 1 Pull Request to a repository out of <a href="https://github.com/ourtigarage">ourtigarage</a> organisation', &:contributed_out_of_org?),
+  Badge.new('adventure', 'The adventurer', 'Submitted 1 Pull Request to a repository he does not own, out of <a href="https://github.com/ourtigarage">ourtigarage</a> organisation', &:contributed_out_of_org?),
   Badge.new('novelist', 'The novelist', 'Wrote more than 100 words in a Pull Request\'s description', &:contribution_with_100_words?),
-  Badge.new('taciturn', 'The taciturn', 'Submitted a Pull Request with no description', &:contribution_with_no_word?)
+  Badge.new('taciturn', 'The taciturn', 'Submitted a Pull Request with no description', &:contribution_with_no_word?),
+  Badge.new('pirate', 'The pirate', 'A lawless pirate who submitted Pull Requests to his own repositories. Cheater...', &:contribution_to_own_repos?)
 ].freeze
 
 # The leaderboard root class, where the magic happens
@@ -119,6 +121,7 @@ class Member
     @username = github_user.login
     @avatar = github_user.avatar_url
     @profile = github_user.html_url
+    @repos_base_url
     @contributions = contributions
   end
 
@@ -150,7 +153,7 @@ class Member
   end
 
   def contributed_out_of_org?
-    contributions.any? { |c| !c.repository_url.start_with? ORG_URL }
+    contributions.any? { |c| !c.repository_url.start_with?(ORG_REPOS_URL) && !c.repository_url.start_with?("#{BASE_REPOS_URL}/#{@username}") }
   end
 
   def contribution_with_100_words?
@@ -159,6 +162,10 @@ class Member
 
   def contribution_with_no_word?
     contributions.any? { |c| c.body.strip.empty? }
+  end
+
+  def contribution_to_own_repos?
+    contributions.any? { |c| c.repository_url.start_with? "#{BASE_REPOS_URL}/#{@username}" }
   end
 
   def badges
