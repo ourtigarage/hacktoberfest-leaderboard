@@ -33,7 +33,6 @@ GEM
     tilt (2.0.8)
 
 PLATFORMS
-  linux
   x64-mingw32
 
 DEPENDENCIES
