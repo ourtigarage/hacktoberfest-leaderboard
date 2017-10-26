@@ -6,4 +6,5 @@ source 'https://rubygems.org' do
   gem 'octokit'
   gem 'sinatra'
   gem 'rake'
+  gem 'test-unit'
 end
