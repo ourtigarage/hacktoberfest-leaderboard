@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/ourtigarage/hacktoberfest-leaderboard.svg?branch=master)](https://travis-ci.org/ourtigarage/hacktoberfest-leaderboard)
 # hacktoberfest-leaderboard
 This is the leaderboard application for the Hacktoberfest summit.
 The application is kept simple so you can improve it with your own pull requests to help you
