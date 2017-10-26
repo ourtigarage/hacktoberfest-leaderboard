@@ -31,9 +31,15 @@ On first run, you need to execute
 
 Then start the application by running
 ```bash
-    bundle exec ruby server.rb
+    bundle exec rake run
 ```
 then browse to http://localhost
+
+### Running tests
+In order to run unit tests, run
+```bash
+    bundle exec rake
+```
 
 ### Useful documents
 * [Sinatra usage](http://www.sinatrarb.com/intro.html) (Web microframework)
