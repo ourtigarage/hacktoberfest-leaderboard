@@ -42,7 +42,7 @@ BADGES = [
 class Leaderboard
   # Initialize the leaderboard for the given event date and participant file URL
   def initialize(event_date, participants_file_url)
-    @file_uri = URI(participants_file_url)
+    @file_uri = participants_file_url
     @event_date = event_date
     # Connect to GitHub using a token from env variable.
     # If no token is set, no problem it will still work,
