@@ -1,0 +1,16 @@
+{
+  "name": "Hacktoberfest-Leaderboard",
+  "description": "Make the hacktoberfest a competition with a leaderboard",
+  "keywords": [
+    "hacktoberfest",
+    "leaderboard"
+  ],
+  "repository": "https://github.com/ourtigarage/hacktoberfest-leaderboard",
+  "success_url": "/",
+  "env": {
+    "GH_TOKEN": {
+      "description": "The github token used to authenticate to github API",
+      "required": false
+    }
+  }
+}
