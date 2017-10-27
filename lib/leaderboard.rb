@@ -23,7 +23,8 @@ class Badge
   end
 
   def earned_by?(player)
-    @block.call(player)
+    # Return false if no evaluation predicate has been provided
+    @block && @block.call(player) || false
   end
 end
 
@@ -35,7 +36,8 @@ BADGES = [
   Badge.new('adventure', 'The adventurer', 'Submitted 1 Pull Request to a repository he does not own, out of <a href="https://github.com/ourtigarage">ourtigarage</a> organisation', &:contributed_out_of_org?),
   Badge.new('novelist', 'The novelist', 'Wrote more than 100 words in a Pull Request\'s description', &:contribution_with_100_words?),
   Badge.new('taciturn', 'The taciturn', 'Submitted a Pull Request with no description', &:contribution_with_no_word?),
-  Badge.new('pirate', 'The pirate', 'A lawless pirate who submitted Pull Requests to his own repositories. Cheater...', &:contribution_to_own_repos?)
+  Badge.new('pirate', 'The mighty pirate', 'A lawless pirate who submitted Pull Requests to his own repositories. Cheater...', &:contribution_to_own_repos?),
+  Badge.new('crap', 'The smelly code', 'Has a Pull Request marked as invalid. Probably some bad smelling code', &:invalid_contribs?)
 ].freeze
 
 # The leaderboard root class, where the magic happens
@@ -82,7 +84,8 @@ class Leaderboard
 
   def query_users_data(usernames)
     authors = usernames.map { |n| "author:#{n}" }.join ' '
-    query_filter = "is:pr #{authors} created:#{@event_date} -label:invalid"
+    # query_filter = "is:pr #{authors} created:#{@event_date} -label:invalid"
+    query_filter = "#{authors} created:#{@event_date}"
     @github.search_issues(query_filter)
            .items
            .each_with_object({}) { |e, acc| (acc[e.user.login] ||= [e.user, []])[1] << e }
@@ -98,7 +101,7 @@ class Leaderboard
 
   def add_missing_users(usernames, data)
     query_missing_users_data(usernames, data)
-      .each_with_object(data) { |e, acc| add_user(acc, e) }
+      .each_with_object(data) { |e, acc| acc[e.login] ||= [e, []] }
   end
 
   def members_data(usernames)
@@ -114,15 +117,17 @@ end
 
 # A contest member from the participant list in landing page
 class Member
-  attr_reader :username, :avatar, :profile, :contributions
+  attr_reader :username, :avatar, :profile, :contributions, :invalids, :issues
 
   # Construct a user using the data fetched from GitHub
   def initialize(github_user, contributions)
     @username = github_user.login
     @avatar = github_user.avatar_url
     @profile = github_user.html_url
-    @repos_base_url
-    @contributions = contributions
+    @invalids = []
+    @contributions = []
+    @issues = []
+    add_contributions(contributions)
   end
 
   # Check if the user has completed the challenge
@@ -153,7 +158,10 @@ class Member
   end
 
   def contributed_out_of_org?
-    contributions.any? { |c| !c.repository_url.start_with?(ORG_REPOS_URL) && !c.repository_url.start_with?("#{BASE_REPOS_URL}/#{@username}") }
+    contributions.any? do |c|
+      !c.repository_url.start_with?(ORG_REPOS_URL) &&
+        !c.repository_url.start_with?("#{BASE_REPOS_URL}/#{@username}")
+    end
   end
 
   def contribution_with_100_words?
@@ -165,7 +173,13 @@ class Member
   end
 
   def contribution_to_own_repos?
-    contributions.any? { |c| c.repository_url.start_with? "#{BASE_REPOS_URL}/#{@username}" }
+    contributions.any? do |c|
+      c.repository_url.start_with? "#{BASE_REPOS_URL}/#{@username}"
+    end
+  end
+
+  def invalid_contribs?
+    !invalids.empty?
   end
 
   def badges
@@ -178,5 +192,19 @@ class Member
       avatar: @avatar,
       profile: @profile
     }.to_json
+  end
+
+  private
+
+  def add_contributions(contributions)
+    contributions.each do |contrib|
+      if !contrib.pull_request
+        @issues << contrib
+      elsif contrib.labels.any? { |l| l.name == 'invalid' }
+        @invalids << contrib
+      else
+        @contributions << contrib
+      end
+    end
   end
 end
