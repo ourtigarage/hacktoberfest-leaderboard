@@ -27,6 +27,12 @@ class Badge
     return false if !@block || @block.call(player) == false
     @block.call(player) == true || @block.call(player) > 0
   end
+
+  def times_earned_by(player)
+    # Return 0 if no evaluation predicate has been provided
+    return 0 if !@block || @block.call(player) == false
+    @block.call(player) == true ? 1 : @block.call(player)
+  end
 end
 
 # This is the list of all badges that can be earned
