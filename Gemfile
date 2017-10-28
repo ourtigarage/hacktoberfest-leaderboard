@@ -7,4 +7,5 @@ source 'https://rubygems.org' do
   gem 'sinatra'
   gem 'rake'
   gem 'test-unit'
+  gem 'byebug', require: false
 end
