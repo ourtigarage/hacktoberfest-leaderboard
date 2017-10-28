@@ -29,16 +29,18 @@ class Badge
   end
 end
 
+# This is the list of all badges that can be earned
+# The block that define the badge's challenge should return either an integer or a boolean
 BADGES = [
   Badge.new('hacktoberfest', 'Hacktoberfest completed', 'Completed the hacktoberfest challenge by submitting 4 pull requests', &:challenge_complete?),
-  Badge.new('snake', 'The snake charmer', 'Submitted 1 Pull Request to the <a href="https://ourtigarage.github.io/web-snake/">snake game</a>\'s code repository', &:contributed_to_snake?),
-  Badge.new('leaderboard', 'The leaderboard contributor', 'Submitted 1 Pull Request to this leaderboard\'s code repository', &:contributed_to_leaderboard?),
+  Badge.new('snake', 'The snake charmer', 'Submitted 1 Pull Request to the <a href="https://ourtigarage.github.io/web-snake/">snake game</a>\'s code repository', &:contributed_to_snake),
+  Badge.new('leaderboard', 'The leaderboard contributor', 'Submitted 1 Pull Request to this leaderboard\'s code repository', &:contributed_to_leaderboard),
   Badge.new('10-contributions', 'The Pull Request champion', 'Submitted more than 10 Pull requests', &:ten_contributions?),
-  Badge.new('adventure', 'The adventurer', 'Submitted 1 Pull Request to a repository he does not own, out of <a href="https://github.com/ourtigarage">ourtigarage</a> organisation', &:contributed_out_of_org?),
-  Badge.new('novelist', 'The novelist', 'Wrote more than 100 words in a Pull Request\'s description', &:contribution_with_100_words?),
-  Badge.new('taciturn', 'The taciturn', 'Submitted a Pull Request with no description', &:contribution_with_no_word?),
-  Badge.new('pirate', 'The mighty pirate', 'A lawless pirate who submitted Pull Requests to his own repositories. Cheater...', &:contribution_to_own_repos?),
-  Badge.new('crap', 'The smelly code', 'Has a Pull Request marked as invalid. Probably some bad smelling code', &:invalid_contribs?)
+  Badge.new('adventure', 'The adventurer', 'Submitted 1 Pull Request to a repository he does not own, out of <a href="https://github.com/ourtigarage">ourtigarage</a> organisation', &:contributed_out_of_org),
+  Badge.new('novelist', 'The novelist', 'Wrote more than 100 words in a Pull Request\'s description', &:contribution_with_100_words),
+  Badge.new('taciturn', 'The taciturn', 'Submitted a Pull Request with no description', &:contribution_with_no_word),
+  Badge.new('pirate', 'The mighty pirate', 'A lawless pirate who submitted Pull Requests to his own repositories. Cheater...', &:contribution_to_own_repos),
+  Badge.new('crap', 'The smelly code', 'Has a Pull Request marked as invalid. Probably some bad smelling code', &:invalid_contribs)
 ].freeze
 
 # The leaderboard root class, where the magic happens
@@ -146,41 +148,41 @@ class Member
     contributions.size
   end
 
-  def contributed_to_snake?
-    contributions.any? { |c| c.repository_url == SNAKE_URL }
+  def contributed_to_snake
+    contributions.count { |c| c.repository_url == SNAKE_URL }
   end
 
-  def contributed_to_leaderboard?
-    contributions.any? { |c| c.repository_url == LEADERBOARD_URL }
+  def contributed_to_leaderboard
+    contributions.count { |c| c.repository_url == LEADERBOARD_URL }
   end
 
   def ten_contributions?
     contributions.size >= 10
   end
 
-  def contributed_out_of_org?
-    contributions.any? do |c|
+  def contributed_out_of_org
+    contributions.count do |c|
       !c.repository_url.start_with?(ORG_REPOS_URL) &&
         !c.repository_url.start_with?("#{BASE_REPOS_URL}/#{@username}")
     end
   end
 
-  def contribution_with_100_words?
-    contributions.any? { |c| c.body.split(' ').count >= 100 }
+  def contribution_with_100_words
+    contributions.count { |c| c.body.split(' ').count >= 100 }
   end
 
-  def contribution_with_no_word?
-    contributions.any? { |c| c.body.strip.empty? }
+  def contribution_with_no_word
+    contributions.count { |c| c.body.strip.empty? }
   end
 
-  def contribution_to_own_repos?
-    contributions.any? do |c|
+  def contribution_to_own_repos
+    contributions.count do |c|
       c.repository_url.start_with? "#{BASE_REPOS_URL}/#{@username}"
     end
   end
 
-  def invalid_contribs?
-    !invalids.empty?
+  def invalid_contribs
+    invalids.size
   end
 
   def badges
