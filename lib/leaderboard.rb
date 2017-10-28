@@ -24,7 +24,8 @@ class Badge
 
   def earned_by?(player)
     # Return false if no evaluation predicate has been provided
-    @block && @block.call(player) || false
+    return false if !@block || @block.call(player) == false
+    @block.call(player) == true || @block.call(player) > 0
   end
 end
 
