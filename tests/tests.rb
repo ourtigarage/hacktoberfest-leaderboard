@@ -1,4 +1,6 @@
 require 'test/unit'
+require_relative '../lib/badge'
+require_relative '../lib/member'
 require_relative '../lib/leaderboard'
 
 # Test case for leaderboard
