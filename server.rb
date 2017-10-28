@@ -4,12 +4,14 @@ require 'sinatra'
 require_relative 'lib/leaderboard'
 
 # URL to the participant list file. Can be local or remote
-PARTICIPANT_FILE = 'https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants.md'.freeze
-# The date for the event in the format YYYY[-MM[-DD]]
-EVENT_DATE = '2017-10'.freeze
+PARTICIPANTS_FILE = 'https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants.md'.freeze
+# The date for the event in the format github date
+# search format. See https://help.github.com/articles/understanding-the-search-syntax/#query-for-dates
+# Default to ">=2005", since gti was released in 2005
+EVENT_DATE = (ENV['EVENT_DATE'] || '>=2005').freeze
 
 # Initialize the leaderboard
-leaderboard = Leaderboard.new EVENT_DATE, PARTICIPANT_FILE
+leaderboard = Leaderboard.new EVENT_DATE, PARTICIPANTS_FILE
 
 # Set listening port from env variable, or fallback to 80 as default
 set :port, ENV['PORT'] || 80
