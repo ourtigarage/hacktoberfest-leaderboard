@@ -40,7 +40,7 @@
 									<!-- List of badges earned -->
 									<% for badge in member.badges %>
 										<div class="popover popover-top">
-											<figure class="avatar avatar-xl">
+											<figure class="avatar avatar-xl badge" data-badge="<%= badge.times_earned_by(member) %>">
 												<img src="img/badges/<%=badge.short%>.png" alt="<%=badge.short%>">
 											</figure>
 											<div class="popover-container">
