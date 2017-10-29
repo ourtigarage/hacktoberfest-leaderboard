@@ -1,8 +1,6 @@
 require 'erubis'
 require 'json'
 require 'sinatra'
-require_relative 'lib/badge'
-require_relative 'lib/member'
 require_relative 'lib/leaderboard'
 
 if ENV['APP_ENV'] == 'development'

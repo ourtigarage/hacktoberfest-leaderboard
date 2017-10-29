@@ -3,8 +3,8 @@ require 'faraday-http-cache'
 require 'json'
 require 'octokit'
 require 'open-uri'
-# require_relative 'badge'
-# require_relative 'member'
+require_relative 'badge'
+require_relative 'member'
 
 include Concurrent
 BASE_API_URL = 'https://api.github.com'.freeze
