@@ -42,6 +42,7 @@ In order to run unit tests, run
 ### Configuring the app
 Configuration is exclusively done by setting environment variables:
 * `PORT` : The port to bind HTTP to. Default to `80`
+* `RACK_ENV` : Should be set to `production`. Automatically set when deploying to Heroku.
 * `GH_TOKEN` : The token to authenticated to github. By default, no token is used, so API alls are not authenticated.
 * `EVENT_DATE` : The date to restrict contribution search to. It must follows the github search date format (more details [here](https://help.github.com/articles/understanding-the-search-syntax/#query-for-dates)). Default value is `>=2005` which basically fetch everything without any restriction
 * `PARTICIPANTS_FILE` : The URI or file path to the file containing the participants' github usernames. See [this file](https://raw.githubusercontent.com/ourtigarage/hacktoberfest-leaderboard/master/tests/resources/participants.md) for an example of how to format that file
