@@ -3,6 +3,8 @@ require 'faraday-http-cache'
 require 'json'
 require 'octokit'
 require 'open-uri'
+require_relative 'badge'
+require_relative 'member'
 
 include Concurrent
 BASE_API_URL = 'https://api.github.com'.freeze
@@ -11,33 +13,18 @@ ORG_REPOS_URL = "#{BASE_REPOS_URL}/ourtigarage".freeze
 SNAKE_URL = "#{ORG_REPOS_URL}/web-snake".freeze
 LEADERBOARD_URL = "#{ORG_REPOS_URL}/hacktoberfest-leaderboard".freeze
 
-# Class reprensenting a badge a player can earn
-class Badge
-  attr_reader :short, :title, :description
-
-  def initialize(short, title, description, &block)
-    @short = short
-    @title = title
-    @description = description
-    @block = block
-  end
-
-  def earned_by?(player)
-    # Return false if no evaluation predicate has been provided
-    @block && @block.call(player) || false
-  end
-end
-
+# This is the list of all badges that can be earned
+# The block that define the badge's challenge should return either an integer or a boolean
 BADGES = [
   Badge.new('hacktoberfest', 'Hacktoberfest completed', 'Completed the hacktoberfest challenge by submitting 4 pull requests', &:challenge_complete?),
-  Badge.new('snake', 'The snake charmer', 'Submitted 1 Pull Request to the <a href="https://ourtigarage.github.io/web-snake/">snake game</a>\'s code repository', &:contributed_to_snake?),
-  Badge.new('leaderboard', 'The leaderboard contributor', 'Submitted 1 Pull Request to this leaderboard\'s code repository', &:contributed_to_leaderboard?),
+  Badge.new('snake', 'The snake charmer', 'Submitted 1 Pull Request to the <a href="https://ourtigarage.github.io/web-snake/">snake game</a>\'s code repository', &:contributed_to_snake),
+  Badge.new('leaderboard', 'The leaderboard contributor', 'Submitted 1 Pull Request to this leaderboard\'s code repository', &:contributed_to_leaderboard),
   Badge.new('10-contributions', 'The Pull Request champion', 'Submitted more than 10 Pull requests', &:ten_contributions?),
-  Badge.new('adventure', 'The adventurer', 'Submitted 1 Pull Request to a repository he does not own, out of <a href="https://github.com/ourtigarage">ourtigarage</a> organisation', &:contributed_out_of_org?),
-  Badge.new('novelist', 'The novelist', 'Wrote more than 100 words in a Pull Request\'s description', &:contribution_with_100_words?),
-  Badge.new('taciturn', 'The taciturn', 'Submitted a Pull Request with no description', &:contribution_with_no_word?),
-  Badge.new('pirate', 'The mighty pirate', 'A lawless pirate who submitted Pull Requests to his own repositories. Cheater...', &:contribution_to_own_repos?),
-  Badge.new('crap', 'The smelly code', 'Has a Pull Request marked as invalid. Probably some bad smelling code', &:invalid_contribs?)
+  Badge.new('adventure', 'The adventurer', 'Submitted 1 Pull Request to a repository he does not own, out of <a href="https://github.com/ourtigarage">ourtigarage</a> organisation', &:contributed_out_of_org),
+  Badge.new('novelist', 'The novelist', 'Wrote more than 100 words in a Pull Request\'s description', &:contribution_with_100_words),
+  Badge.new('taciturn', 'The taciturn', 'Submitted a Pull Request with no description', &:contribution_with_no_word),
+  Badge.new('pirate', 'The mighty pirate', 'A lawless pirate who submitted Pull Requests to his own repositories. Cheater...', &:contribution_to_own_repos),
+  Badge.new('crap', 'The smelly code', 'Has a Pull Request marked as invalid. Probably some bad smelling code', &:invalid_contribs)
 ].freeze
 
 # The leaderboard root class, where the magic happens
@@ -112,99 +99,5 @@ class Leaderboard
     @github.user(username)
   rescue Octokit::NotFound
     nil
-  end
-end
-
-# A contest member from the participant list in landing page
-class Member
-  attr_reader :username, :avatar, :profile, :contributions, :invalids, :issues
-
-  # Construct a user using the data fetched from GitHub
-  def initialize(github_user, contributions)
-    @username = github_user.login
-    @avatar = github_user.avatar_url
-    @profile = github_user.html_url
-    @invalids = []
-    @contributions = []
-    @issues = []
-    add_contributions(contributions)
-  end
-
-  # Check if the user has completed the challenge
-  def challenge_complete?
-    contributions.size >= 4
-  end
-
-  # Returns the completion percentage
-  def challenge_completion
-    [100, ((contributions_count.to_f / 4.0) * 100).to_i].min
-  end
-
-  # Count the number of valid contributions
-  def contributions_count
-    contributions.size
-  end
-
-  def contributed_to_snake?
-    contributions.any? { |c| c.repository_url == SNAKE_URL }
-  end
-
-  def contributed_to_leaderboard?
-    contributions.any? { |c| c.repository_url == LEADERBOARD_URL }
-  end
-
-  def ten_contributions?
-    contributions.size >= 10
-  end
-
-  def contributed_out_of_org?
-    contributions.any? do |c|
-      !c.repository_url.start_with?(ORG_REPOS_URL) &&
-        !c.repository_url.start_with?("#{BASE_REPOS_URL}/#{@username}")
-    end
-  end
-
-  def contribution_with_100_words?
-    contributions.any? { |c| c.body.split(' ').count >= 100 }
-  end
-
-  def contribution_with_no_word?
-    contributions.any? { |c| c.body.strip.empty? }
-  end
-
-  def contribution_to_own_repos?
-    contributions.any? do |c|
-      c.repository_url.start_with? "#{BASE_REPOS_URL}/#{@username}"
-    end
-  end
-
-  def invalid_contribs?
-    !invalids.empty?
-  end
-
-  def badges
-    BADGES.select { |b| b.earned_by?(self) }
-  end
-
-  def to_json(*_opts)
-    {
-      username: @username,
-      avatar: @avatar,
-      profile: @profile
-    }.to_json
-  end
-
-  private
-
-  def add_contributions(contributions)
-    contributions.each do |contrib|
-      if !contrib.pull_request
-        @issues << contrib
-      elsif contrib.labels.any? { |l| l.name == 'invalid' }
-        @invalids << contrib
-      else
-        @contributions << contrib
-      end
-    end
   end
 end
