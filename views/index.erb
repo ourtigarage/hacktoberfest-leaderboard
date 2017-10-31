@@ -38,9 +38,13 @@
 								</div></td>
 								<td>
 									<!-- List of badges earned -->
-									<% for badge in member.badges %>
+									<% for badge in member.badges
+										nbadge = badge.times_earned_by(member)
+										cls = "avatar avatar-xl"
+										cls << " badge" if nbadge > 1
+									%>
 										<div class="popover popover-top">
-											<figure class="avatar avatar-xl badge" data-badge="<%= badge.times_earned_by(member) %>">
+											<figure class="<%= cls %>" data-badge="<%= nbadge %>">
 												<img src="img/badges/<%=badge.short%>.png" alt="<%=badge.short%>">
 											</figure>
 											<div class="popover-container">

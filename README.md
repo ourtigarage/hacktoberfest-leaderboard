@@ -60,3 +60,4 @@ then browse to http://localhost
 ### Useful documents
 * [Sinatra usage](http://www.sinatrarb.com/intro.html) (Web microframework)
 * [Octokit usage](http://www.rubydoc.info/gems/octokit/) (github api library)
+* [Spectre CSS](https://picturepan2.github.io/spectre)
