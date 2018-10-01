@@ -12,6 +12,8 @@ PARTICIPANTS_FILE = (ENV['PARTICIPANTS_FILE'] || 'https://raw.githubusercontent.
 # Default to ">=2005", since gti was released in 2005
 EVENT_DATE = (ENV['EVENT_DATE'] || '>=2005').freeze
 
+Member.objective = (ENV['OBJECTIVE'].to_i || 5).freeze
+
 # Initialize the leaderboard
 leaderboard = Leaderboard.new EVENT_DATE, PARTICIPANTS_FILE
 

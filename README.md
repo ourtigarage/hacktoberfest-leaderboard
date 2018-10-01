@@ -48,6 +48,7 @@ Configuration is exclusively done by setting environment variables:
 * `GH_TOKEN` : The token to authenticated to github. By default, no token is used, so API calls are not authenticated.
 * `EVENT_DATE` : The date to restrict contribution search to. It must follows the github search date format (more details [here](https://help.github.com/articles/understanding-the-search-syntax/#query-for-dates)). Default value is `>=2005` which basically fetch everything without any restriction
 * `PARTICIPANTS_FILE` : The URI or file path to the file containing the participants' github usernames. See [this file](https://raw.githubusercontent.com/ourtigarage/hacktoberfest-leaderboard/master/tests/resources/participants.md) for an example of how to format that file
+* `OBJECTIVE` : Number of pull requests to make in order to complete the challenge. Default value is `5`
 
 > Again, if the app running behind a proxy, you'll need to set both environment variables `HTTP_PROXY` and `HTTPS_PROXY` before running it
 

@@ -2,6 +2,14 @@
 class Member
   attr_reader :username, :avatar, :profile, :contributions, :invalids, :issues
 
+  def self.objective=(target)
+    @@objective = target
+  end
+
+  def self.objective()
+    @@objective
+  end
+
   # Construct a user using the data fetched from GitHub
   def initialize(github_user, contributions)
     @username = github_user.login
@@ -15,12 +23,12 @@ class Member
 
   # Check if the user has completed the challenge
   def challenge_complete?
-    contributions.size >= 4
+    contributions.size >= @@objective
   end
 
   # Returns the completion percentage
   def challenge_completion
-    [100, ((contributions_count.to_f / 4.0) * 100).to_i].min
+    [100, ((contributions_count.to_f / @@objective.to_f) * 100).to_i].min
   end
 
   # Count the number of valid contributions
