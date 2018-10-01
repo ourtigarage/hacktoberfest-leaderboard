@@ -7,6 +7,7 @@ require_relative 'badge'
 require_relative 'member'
 
 include Concurrent
+
 BASE_API_URL = 'https://api.github.com'.freeze
 BASE_REPOS_URL = "#{BASE_API_URL}/repos".freeze
 ORG_REPOS_URL = "#{BASE_REPOS_URL}/ourtigarage".freeze
@@ -75,7 +76,9 @@ class Leaderboard
     query_filter = "#{authors} created:#{@event_date}"
     @github.search_issues(query_filter)
            .items
-           .each_with_object({}) { |e, acc| (acc[e.user.login] ||= [e.user, []])[1] << e }
+           .each_with_object({}) do |e, acc|
+             (acc[e.user.login] ||= [e.user, []])[1] << e
+           end
   end
 
   def query_missing_users_data(usernames, data)

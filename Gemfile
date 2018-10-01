@@ -4,8 +4,11 @@ source 'https://rubygems.org' do
   gem 'faraday-http-cache'
   gem 'json'
   gem 'octokit'
-  gem 'sinatra'
   gem 'rake'
-  gem 'test-unit'
-  gem 'byebug', require: false
+  gem 'sinatra'
+
+  group :development do
+    gem 'byebug', require: false
+    gem 'test-unit'
+  end
 end

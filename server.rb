@@ -3,9 +3,7 @@ require 'json'
 require 'sinatra'
 require_relative 'lib/leaderboard'
 
-if ENV['APP_ENV'] == 'development'
-  require 'byebug'
-end
+require 'byebug' if ENV['APP_ENV'] == 'development'
 
 # URL to the participant list file. Can be local or remote
 PARTICIPANTS_FILE = 'https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants.md'.freeze
