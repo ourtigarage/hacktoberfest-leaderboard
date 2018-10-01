@@ -1,3 +1,4 @@
+ruby '2.5.1'
 source 'https://rubygems.org' do
   gem 'concurrent-ruby'
   gem 'erubis'
