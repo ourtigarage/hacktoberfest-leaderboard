@@ -19,6 +19,11 @@
     "PARTICIPANTS_FILE": {
       "description": "URI to the file containing the list of participants. Can be a local or a remote file",
       "required": true
+    },
+    "OBJECTIVE": {
+      "description": "Number of pull requests to make in order to complete the challenge",
+      "value": "5",
+      "required": false
     }
   }
 }
