@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Class reprensenting a badge a player can earn
 class Badge
   attr_reader :short, :title, :description
@@ -11,12 +13,12 @@ class Badge
 
   def earned_by?(player)
     # Return false if no evaluation predicate has been provided
-    times_earned_by(player) > 0
+    times_earned_by(player).positive?
   end
 
   def times_earned_by(player)
     # Return 0 if no evaluation predicate has been provided
-    result = @block && @block.call(player) || 0
+    result = @block&.call(player) || 0
     result == true ? 1 : result
   end
 end

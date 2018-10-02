@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # A contest member from the participant list in landing page
 class Member
   attr_reader :username, :avatar, :profile, :contributions, :invalids, :issues
@@ -6,7 +8,7 @@ class Member
     @@objective = target
   end
 
-  def self.objective()
+  def self.objective
     @@objective
   end
 
