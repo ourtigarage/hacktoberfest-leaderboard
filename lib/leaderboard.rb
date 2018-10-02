@@ -19,7 +19,7 @@ LEADERBOARD_URL = "#{ORG_REPOS_URL}/hacktoberfest-leaderboard"
 # This is the list of all badges that can be earned
 # The block that define the badge's challenge should return either an integer or a boolean
 BADGES = [
-  Badge.new('hacktoberfest', 'Hacktoberfest completed', 'Completed the hacktoberfest challenge by submitting 4 pull requests', &:challenge_complete?),
+  Badge.new('hacktoberfest', 'Hacktoberfest completed', 'Completed the hacktoberfest challenge by submitting enough pull requests', &:challenge_complete?),
   Badge.new('snake', 'The snake charmer', 'Submitted 1 Pull Request to the <a href="https://ourtigarage.github.io/web-snake/">snake game</a>\'s code repository', &:contributed_to_snake),
   Badge.new('leaderboard', 'The leaderboard contributor', 'Submitted 1 Pull Request to this leaderboard\'s code repository', &:contributed_to_leaderboard),
   Badge.new('10-contributions', 'The Pull Request champion', 'Submitted more than 10 Pull requests', &:ten_contributions?),
