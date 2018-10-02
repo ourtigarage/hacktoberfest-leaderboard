@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'concurrent'
 require 'faraday-http-cache'
 require 'json'
@@ -8,11 +10,11 @@ require_relative 'member'
 
 include Concurrent
 
-BASE_API_URL = 'https://api.github.com'.freeze
-BASE_REPOS_URL = "#{BASE_API_URL}/repos".freeze
-ORG_REPOS_URL = "#{BASE_REPOS_URL}/ourtigarage".freeze
-SNAKE_URL = "#{ORG_REPOS_URL}/web-snake".freeze
-LEADERBOARD_URL = "#{ORG_REPOS_URL}/hacktoberfest-leaderboard".freeze
+BASE_API_URL = 'https://api.github.com'
+BASE_REPOS_URL = "#{BASE_API_URL}/repos"
+ORG_REPOS_URL = "#{BASE_REPOS_URL}/ourtigarage"
+SNAKE_URL = "#{ORG_REPOS_URL}/web-snake"
+LEADERBOARD_URL = "#{ORG_REPOS_URL}/hacktoberfest-leaderboard"
 
 # This is the list of all badges that can be earned
 # The block that define the badge's challenge should return either an integer or a boolean

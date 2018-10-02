@@ -1,0 +1,24 @@
+<div class="subPart">
+    <h2>Available badges</h2>
+    <div class="container">
+        <div class="columns">
+            <% for badge in badges %>
+                <div class="column col-3 col-md-6 col-sm-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title h5"><%=badge.title%></div>
+                        </div>
+                        <div class="card-image" style="text-align: center">
+                            <figure class="avatar avatar-xl">
+                                <img src="img/badges/<%=badge.short%>.png" alt="<%=badge.short%>">
+                            </figure>
+                        </div>
+                        <div class="card-body">
+                            <%=badge.description%>
+                        </div>
+                    </div>
+                </div>
+            <% end %>
+        </div>
+    </div>
+</div>
