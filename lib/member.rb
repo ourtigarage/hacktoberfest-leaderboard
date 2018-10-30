@@ -2,7 +2,7 @@
 
 # A contest member from the participant list in landing page
 class Member
-  attr_reader :username, :avatar, :profile, :contributions, :invalids, :issues
+  attr_reader :username, :avatar, :profile, :contributions, :repositories, :invalids, :issues
 
   def self.objective=(target)
     @@objective = target
@@ -19,6 +19,7 @@ class Member
     @profile = github_user.html_url
     @invalids = []
     @contributions = []
+    @repositories = []
     @issues = []
     add_contributions(contributions)
   end
@@ -91,6 +92,8 @@ class Member
 
   def add_contributions(contributions)
     contributions.each do |contrib|
+      contrib.repository = Octokit::Repository.from_url contrib.repository_url
+      @repositories << contrib.repository unless @repositories.map(&:name).include?(contrib.repository.name)
       if !contrib.pull_request
         @issues << contrib
       elsif contrib.labels.any? { |l| l.name == 'invalid' }
