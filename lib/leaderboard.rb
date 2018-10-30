@@ -70,6 +70,12 @@ class Leaderboard
                                .map { |user| Member.new(*user) }
   end
 
+  def get_member_by_username(username)
+    members.find{ |u| u.username == username }
+  rescue
+    nil
+  end
+
   private
 
   def query_users_data(usernames)
