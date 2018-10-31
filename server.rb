@@ -32,6 +32,11 @@ get '/badges' do
   erb :badges, locals: { badges: BADGES }, layout: 'layouts/main'.to_sym
 end
 
+get '/:member' do
+  member = leaderboard.get_member_by_username(params[:member])
+  erb :member, locals: { member: member }, layout: 'layouts/main'.to_sym
+end
+
 get '/api/members' do
   content_type :json
   leaderboard.members.to_json
