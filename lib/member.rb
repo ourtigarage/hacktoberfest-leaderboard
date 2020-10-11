@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'date'
+
 # A contest member from the participant list in landing page
 class Member
   attr_reader :username, :avatar, :profile, :contributions, :repositories, :invalids, :issues
@@ -13,12 +15,14 @@ class Member
   end
 
   # Construct a user using the data fetched from GitHub
-  def initialize(github_user, contributions)
+  def initialize(github_user, contributions, github)
+    @github = github
     @username = github_user.login
     @avatar = github_user.avatar_url
     @profile = github_user.html_url
     @invalids = []
     @contributions = []
+    @ignored = [] # Contributions which do not count for Hacktoberfest
     @repositories = []
     @issues = []
     add_contributions(contributions)
@@ -94,12 +98,19 @@ class Member
     contributions.each do |contrib|
       contrib.repository = Octokit::Repository.from_url contrib.repository_url
       @repositories << contrib.repository unless @repositories.map(&:name).include?(contrib.repository.name)
+      reponame = "#{contrib.repository.owner}/#{contrib.repository.name}"
       if !contrib.pull_request
         @issues << contrib
-      elsif contrib.labels.any? { |l| l.name == 'invalid' }
+      elsif contrib.labels.any? { |l| l.name == 'invalid' || l.name == 'spam' }
         @invalids << contrib
-      else
+      elsif contrib.labels.any? { |l| l.name == 'hacktoberfest-accepted' } ||
+            contrib.created_at < Time.parse('2020-10-3') ||
+            @github.topics(reponame).names.include?('hacktoberfest') && @github.pull_merged?(reponame, contrib.number)
+        # Check that PR fits the new rules introduced in 2020 edition
         @contributions << contrib
+      else
+        # Contributions which do not count for Hacktoberfest (since 2020 edition)
+        @ignored << contrib
       end
     end
   end
