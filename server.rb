@@ -14,7 +14,7 @@ PARTICIPANTS_FILE = (ENV['PARTICIPANTS_FILE'] || 'https://raw.githubusercontent.
 # Default to ">=2005", since git was released in 2005
 EVENT_DATE = (ENV['EVENT_DATE'] || '>=2005').freeze
 
-Member.objective = (ENV['OBJECTIVE'] || '5').to_i.freeze
+Member.objective = (ENV['OBJECTIVE'] || '4').to_i.freeze
 
 # Initialize the leaderboard
 leaderboard = Leaderboard.new EVENT_DATE, PARTICIPANTS_FILE

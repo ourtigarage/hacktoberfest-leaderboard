@@ -85,7 +85,7 @@ class Leaderboard
     @github.search_issues(query_filter)
            .items
            .each_with_object({}) do |e, acc|
-             (acc[e.user.login] ||= [e.user, []])[1] << e
+             (acc[e.user.login] ||= [e.user, [], @github])[1] << e
            end
   end
 
@@ -99,7 +99,7 @@ class Leaderboard
 
   def add_missing_users(usernames, data)
     query_missing_users_data(usernames, data)
-      .each_with_object(data) { |e, acc| acc[e.login] ||= [e, []] }
+      .each_with_object(data) { |e, acc| acc[e.login] ||= [e, [], @github] }
   end
 
   def members_data(usernames)
