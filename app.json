@@ -22,7 +22,7 @@
     },
     "OBJECTIVE": {
       "description": "Number of pull requests to make in order to complete the challenge",
-      "value": "5",
+      "value": "4",
       "required": false
     }
   }
