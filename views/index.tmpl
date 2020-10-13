@@ -1,54 +1,54 @@
+{{ define "content" }}
 <div class="subPart">
-	<% members = leaderboard.members.sort_by{ |m| -m.contributions_count } %>
-	<h2>Leaderboard - <%= members.size %> contributors</h2>
+	<h2>Leaderboard - {{ .PlayerNames | len }} players</h2>
 
 	<table class="table table-striped table-hover">
 		<thead></thead>
 		<tbody>
-			<% for member in members do %>
+			{{ range .PlayersSorted }}
 				<tr class="member">
-					<td><a href="/<%=member.username%>">
-						<figure class="avatar avatar-xl badge" data-initial="YZ" data-badge="<%= member.contributions_count %>">
-							<img src="<%=member.avatar%>" alt="YZ"/>
-							<% if member.challenge_complete? %>
+					<td><a href="/player/{{ .Username }}">
+						<figure class="avatar avatar-xl badge" data-initial="YZ" data-badge="{{ .ContributionCount }}">
+							<img src="{{ .Avatar }}" alt="YZ"/>
+							{{ if .IsChallengeComplete }}
 								<img src="img/medal.png" class="avatar-icon">
-							<% end %>
+							{{ end }}
 						</figure>
 					</a></td>
-					<td><a href="/<%=member.username%>">
-						<%=member.username%>
+					<td><a href="/player/{{ .Username }}">
+						{{ .Username }}
 					</a></td>
 					<td><div class="bar">
-						<div class="bar-item" style="width:<%=member.challenge_completion%>%;background:#818bd5;">
-							<%=member.contributions_count%>/<%=Member.objective%>
+						<div class="bar-item" style="width:{{ .ChallengeCompletion }}%;background:#818bd5;">
+							{{ .ContributionCount }}/{{ .Objective }}
 						</div>
 					</div></td>
 					<td>
 						<!-- List of badges earned -->
-						<% for badge in member.badges
-							nbadge = badge.times_earned_by(member)
-							cls = "avatar avatar-xl"
-							cls << " badge" if nbadge > 1
-						%>
+						{{ $player := . }}
+						{{ range .Badges }}
+						{{ $nbadge := .TotalEarn $player }}
+						{{ $cls := "" }}
+						{{ if gt $nbadge 1 }}{{ $cls = " badge"}}{{ end }}
 							<div class="popover popover-top">
-								<figure class="<%= cls %>" data-badge="<%= nbadge %>">
-									<img src="img/badges/<%=badge.short%>.png" alt="<%=badge.short%>">
+								<figure class="avatar avatar-xl{{ $cls }}" data-badge="{{ $nbadge }}">
+									<img src="img/badges/{{ .Short }}.png" alt="{{ .Short }}">
 								</figure>
 								<div class="popover-container">
 									<div class="card">
 										<div class="card-header">
-											<div class="text-large text-bold"><%=badge.title%></div>
+											<div class="text-large text-bold">{{ .Title }}</div>
 										</div>
 										<div class="card-body">
-											<%=badge.description%>
+											{{ .Description }}
 										</div>
 									</div>
 								</div>
 							</div>
-						<% end %>
+						{{ end }}
 					</td>
 				</tr>
-			<% end %>
+			{{ end }}
 		</tbody>
 	</table>
 
@@ -66,3 +66,4 @@
 	<br/>
 	Happy coding folks !!!
 </div>
+{{ end }}

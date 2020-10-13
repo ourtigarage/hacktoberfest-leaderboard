@@ -51,3 +51,4 @@ build-iPhoneSimulator/
 
 # byebug debugger history
 .byebug_history
+/.vscode
