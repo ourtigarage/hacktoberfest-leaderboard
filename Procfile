@@ -1,1 +1,1 @@
-web: bundle exec rake run
+web: leaderboard

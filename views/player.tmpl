@@ -1,17 +1,18 @@
+{{ define "content" }}
 <div class="subPart">
   <div class="container">
     <div class="columns">
       <div class="panel centered column col-10">
         <div class="panel-header text-center">
           <figure class="avatar avatar-xl">
-            <img src="<%=member.avatar%>" alt="Avatar">
-            <% if member.challenge_complete? %>
-              <img src="img/medal.png" class="avatar-icon">
-            <% end %>
+            <img src="{{ .Avatar }}" alt="Avatar">
+            {{ if .IsChallengeComplete }}
+              <img src="/img/medal.png" class="avatar-icon">
+            {{ end }}
           </figure>
-          <div class="panel-title h5 mt-10"><%=member.username%></div>
+          <div class="panel-title h5 mt-10">{{ .Username }}</div>
           <div class="panel-subtitle">
-            <a href="<%=member.profile%>"><%=member.profile%></a>
+            <a href="{{ .Profile }}">{{ .Profile }}</a>
           </div>
         </div>
 
@@ -24,19 +25,19 @@
               <div class="tile tile-centered">
                 <div class="tile-content">
                   <div class="bar">
-                    <div class="bar-item" style="width:<%=member.challenge_completion%>%;background:#818bd5;">
-                      <%=member.contributions_count%>/<%=Member.objective%>
+                    <div class="bar-item" style="width:{{ .ChallengeCompletion }}%;background:#818bd5;">
+                      {{ .ContributionCount }}/{{ .Objective }}
                     </div>
                   </div>
                 </div>
                 <div class="tile-icon">
                   <div class="example-tile-icon">
                     <i class="icon icon-file centered">
-                      <% if member.challenge_complete? %>
+                       {{ if .IsChallengeComplete }}
                         <figure class="avatar avatar-xl">
                           <img src="/img/badges/hacktoberfest.png" alt="Challenge complete">
                         </figure>
-                      <% end %>
+                      {{ end }}
                     </i>
                   </div>
                 </div>
@@ -49,7 +50,7 @@
               <div class="tile-icon">
                 <div class="example-tile-icon">
                   <i class="icon icon-file text-center">
-                    <figure class="avatar avatar-xl" data-initial="<%=member.badges.length%>"></figure>
+                    <figure class="avatar avatar-xl" data-initial="{{ .Badges | len }}"></figure>
                   </i>
                 </div>
               </div>
@@ -61,7 +62,7 @@
               <div class="tile-icon">
                 <div class="example-tile-icon">
                   <i class="icon icon-file text-center">
-                    <figure class="avatar avatar-xl" data-initial="<%=member.repositories.length%>"></figure>
+                    <figure class="avatar avatar-xl" data-initial="{{ .Repos | len }}"></figure>
                   </i>
                 </div>
               </div>
@@ -73,7 +74,7 @@
               <div class="tile-icon">
                 <div class="example-tile-icon">
                   <i class="icon icon-file text-center">
-                    <figure class="avatar avatar-xl" data-initial="<%=member.contributions.length%>"></figure>
+                    <figure class="avatar avatar-xl" data-initial="{{ .ContributionCount }}"></figure>
                   </i>
                 </div>
               </div>
@@ -85,27 +86,27 @@
               <p class="tile-title text-bold">Badges</p>
             </div>
             <div class="columns">
-              <% for badge in member.badges
-                nbadge = badge.times_earned_by(member)
-                cls = "avatar avatar-xl"
-                cls << " badge" if nbadge > 1
-              %>
+              {{ $player := . }}
+              {{ range .Badges }}
+              {{ $nbadge := .TotalEarn $player }}
+              {{ $cls := "" }}
+              {{ if gt $nbadge 1 }}{{ $cls = " badge"}}{{ end }}
                 <div class="column col-3 col-md-6 col-sm-12">
                   <div class="card text-left">
                     <div class="card-header">
-                      <div class="card-title h5" text-left><%=badge.title%></div>
+                      <div class="card-title h5" text-left>{{ .Title }}</div>
                     </div>
                     <div class="card-image text-center">
-                      <figure class="<%=cls%>" data-badge="<%=nbadge%>">
-                        <img src="img/badges/<%=badge.short%>.png" alt="<%=badge.short%>">
+                      <figure class="avatar avatar-xl{{ $cls }}" data-badge="{{ $nbadge }}">
+                        <img src="/img/badges/{{ .Short }}.png" alt="{{ .Short }}">
                       </figure>
                     </div>
                     <div class="card-body">
-                      <%=badge.description%>
+                      {{ .Description }}
                     </div>
                   </div>
                 </div>
-              <% end %>
+              {{ end }}
             </div>
           </div>
 
@@ -114,16 +115,16 @@
               <p class="tile-title text-bold">Repositories</p>
             </div>
             <div class="columns">
-              <% for repo in member.repositories%>
+              {{ range .Repos }}
                 <div class="column col-3 col-md-6 col-sm-12">
                   <div class="card">
                     <div class="card-header">
-                      <div class="card-title h5 text-left"><%=repo.name%></div>
-                      <div class="card-title"><a href="<%=repo.url%>"><%=repo.slug%></a></div>
+                      <div class="card-title h5 text-left">{{ .Name }}</div>
+                      <div class="card-title"><a href="{{ .URL }}">{{ .FullName }}</a></div>
                     </div>
                   </div>
                 </div>
-              <% end %>
+              {{ end }}
             </div>
           </div>
 
@@ -132,23 +133,32 @@
               <p class="tile-title text-bold">Contributions</p>
             </div>
             <div class="columns">
-              <% for contrib in member.contributions.concat(member.invalids)%>
+              {{ range .Contributions }}
                 <div class="column col-3 col-md-6 col-sm-12">
                   <div class="card">
                     <div class="card-header">
-                      <div class="card-title h5 text-left"><%=contrib.title%></div>
-                      <div class="card-title"><a href="<%=contrib.html_url%>">view contribution</a></div>
+                      <div class="card-title h5 text-left">{{ .Title }}</div>
+                      <div class="card-title"><a href="{{ .HTMLURL }}">view contribution</a></div>
                     </div>
-                    <% if contrib.labels.any? { |l| l.name == 'invalid' } %>
-                      <div class="card-body text-center">
-                        <figure class="avatar avatar-icon">
-                          <img src="img/badges/crap.png">
-                        </figure>
-                      </div>
-                    <% end %>
                   </div>
                 </div>
-              <% end %>
+              {{ end }}
+
+              {{ range .Invalids }}
+                <div class="column col-3 col-md-6 col-sm-12">
+                  <div class="card">
+                    <div class="card-header">
+                      <div class="card-title h5 text-left">{{ .Title }}</div>
+                      <div class="card-title"><a href="{{ .HTMLURL }}">view contribution</a></div>
+                    </div>
+                    <div class="card-body text-center">
+                      <figure class="avatar avatar-icon">
+                        <img src="/img/badges/crap.png">
+                      </figure>
+                    </div>
+                  </div>
+                </div>
+              {{ end }}
             </div>
           </div>
         </div>
@@ -158,3 +168,4 @@
     </div>
   </div>
 </div>
+{{ end }}
