@@ -1,1 +1,1 @@
-web: hacktoberfest-leaderboard
+web: leaderboard

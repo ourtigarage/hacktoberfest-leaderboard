@@ -1,3 +1,4 @@
+// +heroku goVersion go1.15
 module leaderboard
 
 go 1.15
