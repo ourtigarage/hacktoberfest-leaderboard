@@ -25,7 +25,6 @@ func serverReady(lb *BackgroundLeaderboard) mux.MiddlewareFunc {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if !lb.Ready() {
-				w.WriteHeader(http.StatusServiceUnavailable)
 				views.View(w, "not_ready", views.Data{Refresh: 15})
 				return
 			}
