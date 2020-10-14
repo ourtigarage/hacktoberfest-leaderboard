@@ -5,11 +5,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"regexp"
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/google/go-github/v32/github"
@@ -85,7 +85,7 @@ func (lb *Leaderboard) Player(username string) (*Player, error) {
 }
 
 func (lb *Leaderboard) PlayerNames() ([]string, error) {
-	res, err := http.Get(lb.ParticipantFile)
+	res, err := retryablehttp.Get(lb.ParticipantFile)
 	if err != nil {
 		return nil, err
 	}
@@ -154,6 +154,7 @@ type BackgroundLeaderboard struct {
 	inner   *Leaderboard
 	players Players
 	sorted  []*Player
+	ready   int32
 }
 
 func NewBackgroundLeaderboard(eventDate, playerFile string) *BackgroundLeaderboard {
@@ -162,6 +163,7 @@ func NewBackgroundLeaderboard(eventDate, playerFile string) *BackgroundLeaderboa
 		inner:   NewLeaderboard(eventDate, playerFile),
 		players: Players{},
 		sorted:  []*Player{},
+		ready:   0,
 	}
 	lb.start()
 	return lb
@@ -173,51 +175,57 @@ func NewBackgroundLeaderboard(eventDate, playerFile string) *BackgroundLeaderboa
 // 	return lb.players
 // }
 
-func (lb *BackgroundLeaderboard) PlayersSorted() []*Player {
+func (lb *BackgroundLeaderboard) Ready() bool {
+	return atomic.LoadInt32(&lb.ready) > 0
+}
+
+func (lb *BackgroundLeaderboard) PlayersSorted() ([]*Player, error) {
 	lb.lock.RLock()
 	defer lb.lock.RUnlock()
 	pls := []*Player{}
-	copier.Copy(&pls, lb.sorted)
-	return lb.sorted
+	return pls, copier.Copy(&pls, lb.sorted)
 }
 
 func (lb *BackgroundLeaderboard) Player(username string) (*Player, error) {
 	lb.lock.RLock()
-	defer lb.lock.RUnlock()
 	p, ok := lb.players[username]
 	if !ok {
+		lb.lock.RUnlock()
 		return nil, errors.New("User not found")
 	}
+	lb.lock.RUnlock()
 	res := new(Player)
 	return res, copier.Copy(res, p)
 }
 
 func (lb *BackgroundLeaderboard) PlayerNames() []string {
-	lb.lock.RLock()
-	defer lb.lock.RUnlock()
 	names := make([]string, 0, len(lb.players))
+	lb.lock.RLock()
 	for k := range lb.players {
 		names = append(names, k)
 	}
+	lb.lock.RUnlock()
 	return names
 }
 
 func (lb *BackgroundLeaderboard) start() {
 	fmt.Println("Starting background updater")
 	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				fmt.Println("Background routine panicked:", err)
+				fmt.Println("Restarting background updater")
+				lb.start()
+			}
+		}()
 		for {
 			lb.update()
-			time.Sleep(1 * time.Minute)
+			time.Sleep(COLLECT_PERIOD)
 		}
 	}()
 }
 
 func (lb *BackgroundLeaderboard) update() {
-	defer func() {
-		if err := recover(); err != nil {
-			fmt.Println("Background routine panicked:", err)
-		}
-	}()
 	fmt.Println("Collecting data")
 	players, err := lb.inner.Players()
 	if err != nil {
@@ -228,6 +236,7 @@ func (lb *BackgroundLeaderboard) update() {
 		lb.sort()
 		lb.lock.Unlock()
 		fmt.Println("Collection completed")
+		atomic.StoreInt32(&lb.ready, 1)
 	}
 }
 

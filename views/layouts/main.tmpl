@@ -1,7 +1,9 @@
 {{ define "main" }}
 <html>
     <head>
-		<meta http-equiv="refresh" content="300">
+        {{ if (gt .Refresh 0) }}
+		    <meta http-equiv="refresh" content="{{ .Refresh }}">
+        {{ end }}
         <link rel="stylesheet" href="https://unpkg.com/spectre.css@0.4/dist/spectre.min.css">
 		<link rel="stylesheet" href="/style.css">
         <title>Hacktoberfest leaderboard</title>
@@ -27,7 +29,7 @@
         </header>
 		<div id="content">
 			<h1>Hacktoberfest 2020</h1>
-            {{ template "content" . }}
+            {{ template "content" .Data }}
         </div>
     </body>
 </html>

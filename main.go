@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"text/template"
@@ -28,11 +29,27 @@ var (
 	GH_TOKEN   = ""
 )
 
-var (
-	tmplBadges = template.Must(template.ParseFiles("./views/layouts/main.tmpl", "./views/badges.tmpl"))
-	tmplPlayer = template.Must(template.ParseFiles("./views/layouts/main.tmpl", "./views/player.tmpl"))
-	tmplIndex  = template.Must(template.ParseFiles("./views/layouts/main.tmpl", "./views/index.tmpl"))
-)
+var views = map[string]*template.Template{
+	"badges":    template.Must(template.ParseFiles("./views/layouts/main.tmpl", "./views/badges.tmpl")),
+	"player":    template.Must(template.ParseFiles("./views/layouts/main.tmpl", "./views/player.tmpl")),
+	"index":     template.Must(template.ParseFiles("./views/layouts/main.tmpl", "./views/index.tmpl")),
+	"not_ready": template.Must(template.ParseFiles("./views/layouts/main.tmpl", "./views/not_ready.tmpl")),
+}
+
+type ViewData struct {
+	Refresh int
+	Data    interface{}
+}
+
+func RenderView(w io.Writer, name string, data ViewData) {
+	view, ok := views[name]
+	if !ok {
+		panic("View does not exist : " + name)
+	}
+	if err := view.ExecuteTemplate(w, "main", data); err != nil {
+		fmt.Printf("Failed to render view %s:%s\n", name, err)
+	}
+}
 
 func LookupEnvDefault(key string, def string) string {
 	if v, ok := os.LookupEnv(key); ok {

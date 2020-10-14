@@ -19,7 +19,7 @@ Configuration is exclusively done by setting environment variables:
 * `PARTICIPANTS_FILE` : The URI or file path to the file containing the participants' github usernames. See [this file](https://raw.githubusercontent.com/ourtigarage/hacktoberfest-leaderboard/master/tests/resources/participants.md) for an example of how to format that file
 * **[Deprecated]** `OBJECTIVE` : Number of pull requests to make in order to complete the challenge. Default value is `4`
 
-> Again, if the app running behind a proxy, you'll need to set both environment variables `HTTP_PROXY` and `HTTPS_PROXY` before running it
+> If the app is running behind a proxy, you'll need to set both environment variables `HTTP_PROXY` and `HTTPS_PROXY` before running it
 
 ### Building & Running the app
 Build the application by running
