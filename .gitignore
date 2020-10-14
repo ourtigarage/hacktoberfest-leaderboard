@@ -53,3 +53,4 @@ build-iPhoneSimulator/
 .byebug_history
 /.vscode
 .env
+/*.zip

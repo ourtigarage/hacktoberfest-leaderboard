@@ -1,11 +1,14 @@
 package main
 
-import "strings"
+import (
+	"html/template"
+	"strings"
+)
 
 type Badge struct {
 	Short       string
 	Title       string
-	Description string
+	Description template.HTML
 	f           func(player *Player) int
 }
 
