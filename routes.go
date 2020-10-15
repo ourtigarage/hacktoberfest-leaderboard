@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"leaderboard/views"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -9,10 +10,10 @@ import (
 
 func routes(lb *BackgroundLeaderboard) http.Handler {
 	router := mux.NewRouter()
+	router.Methods("GET").Path("/badges").HandlerFunc(badges())
 	sr := router.PathPrefix("/").Subrouter()
 	sr.Use(serverReady(lb))
 	sr.Methods("GET").Path("/").HandlerFunc(index(lb))
-	sr.Methods("GET").Path("/badges").HandlerFunc(badges(lb))
 	sr.Methods("GET").Path("/player/{username}").HandlerFunc(player(lb))
 	router.Methods("GET").PathPrefix("/").Handler(
 		http.FileServer(http.Dir("./static")),
@@ -24,8 +25,7 @@ func serverReady(lb *BackgroundLeaderboard) mux.MiddlewareFunc {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if !lb.Ready() {
-				w.WriteHeader(http.StatusServiceUnavailable)
-				RenderView(w, "not_ready", ViewData{Refresh: 15})
+				views.View(w, "not_ready", views.Data{Refresh: 15})
 				return
 			}
 			h.ServeHTTP(w, r)
@@ -35,13 +35,13 @@ func serverReady(lb *BackgroundLeaderboard) mux.MiddlewareFunc {
 
 func index(lb *BackgroundLeaderboard) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		RenderView(w, "index", ViewData{Refresh: int(COLLECT_PERIOD.Seconds()), Data: lb})
+		views.View(w, "index", views.Data{Refresh: int(COLLECT_PERIOD.Seconds()), Data: lb})
 	}
 }
 
-func badges(lb *BackgroundLeaderboard) http.HandlerFunc {
+func badges() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		RenderView(w, "badges", ViewData{Refresh: 0, Data: BADGES})
+		views.View(w, "badges", views.Data{Refresh: 0, Data: BADGES})
 	}
 }
 
@@ -54,6 +54,6 @@ func player(lb *BackgroundLeaderboard) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		RenderView(w, "player", ViewData{Refresh: int(COLLECT_PERIOD.Seconds()), Data: player})
+		views.View(w, "player", views.Data{Refresh: int(COLLECT_PERIOD.Seconds()), Data: player})
 	}
 }

@@ -191,7 +191,7 @@ func (lb *BackgroundLeaderboard) Player(username string) (*Player, error) {
 	p, ok := lb.players[username]
 	if !ok {
 		lb.lock.RUnlock()
-		return nil, errors.New("User not found")
+		return nil, fmt.Errorf("User \"%s\" not found", username)
 	}
 	lb.lock.RUnlock()
 	res := new(Player)
