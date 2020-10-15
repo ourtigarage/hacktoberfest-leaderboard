@@ -7,13 +7,14 @@ import (
 )
 
 type Player struct {
-	gh                                        *github.Client
-	Username                                  string
-	Avatar                                    string
-	Profile                                   string
-	Contributions, Pending, Ignored, Invalids []*PullRequest
-	Issues                                    []*Issue
-	Repos                                     map[string]*Repo
+	gh                                           *github.Client
+	Username                                     string
+	Avatar                                       string
+	Profile                                      string
+	Merged, Accepted, Pending, Ignored, Invalids []*PullRequest
+	Issues                                       []*Issue
+	Repos                                        map[string]*Repo
+	LastMergeAt                                  time.Time
 }
 
 type Players map[string]*Player
@@ -32,8 +33,15 @@ func (p *Player) IsChallengeComplete() bool {
 	return p.ContributionCount() >= TARGET_OBJECTIVE
 }
 
+func (p *Player) Contributions() []*PullRequest {
+	prs := make([]*PullRequest, 0, p.ContributionCount())
+	prs = append(prs, p.Merged...)
+	prs = append(prs, p.Accepted...)
+	return prs
+}
+
 func (p *Player) ContributionCount() int {
-	return len(p.Contributions)
+	return len(p.Merged) + len(p.Accepted)
 }
 
 func (_ *Player) Objective() int {
@@ -71,11 +79,21 @@ func (p *Player) AddContrib(pr *PullRequest) {
 	if pr.HasOneOfLabels("invalid", "spam") {
 		p.Invalids = append(p.Invalids, pr)
 	} else if pr.HasOneOfLabels("hacktoberfest-accepted") || pr.CreatedAt.Before(date2020) {
-		p.Contributions = append(p.Contributions, pr)
+		if pr.Merged {
+			p.Merged = append(p.Merged, pr)
+			if p.LastMergeAt.Before(pr.MergedAt) {
+				p.LastMergeAt = pr.MergedAt
+			}
+		} else {
+			p.Accepted = append(p.Accepted, pr)
+		}
 	} else {
 		if pr.Repo.HasTopic("hacktoberfest") {
 			if pr.Merged {
-				p.Contributions = append(p.Contributions, pr)
+				p.Merged = append(p.Merged, pr)
+				if p.LastMergeAt.Before(pr.MergedAt) {
+					p.LastMergeAt = pr.MergedAt
+				}
 			} else if pr.State == "closed" {
 				p.Invalids = append(p.Invalids, pr)
 			} else {

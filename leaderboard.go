@@ -224,13 +224,12 @@ func (lb *BackgroundLeaderboard) PlayerNames() []string {
 }
 
 func (lb *BackgroundLeaderboard) start() {
-	fmt.Println("Starting background updater")
+	fmt.Println("(Re)Starting background updater")
 	go func() {
 		defer func() {
 			if err := recover(); err != nil {
 				fmt.Println("Background routine panicked:", err)
-				fmt.Println("Restarting background updater")
-				lb.start()
+				go func() { time.Sleep(1 * time.Minute); lb.start() }()
 			}
 		}()
 		for {
@@ -248,11 +247,11 @@ func (lb *BackgroundLeaderboard) update() {
 		fmt.Println("[ERROR]", err)
 	} else {
 		duration := time.Since(start)
+		fmt.Println("Collection completed in", duration.String())
 		lb.lock.Lock()
 		lb.players = players
 		lb.sort()
 		lb.lock.Unlock()
-		fmt.Println("Collection completed in", duration.String())
 		atomic.StoreInt32(&lb.ready, 1)
 	}
 }
@@ -262,8 +261,15 @@ func (lb *BackgroundLeaderboard) sort() {
 	for _, p := range lb.players {
 		players = append(players, p)
 	}
-	sort.SliceStable(players, func(i, j int) bool {
-		return players[i].ContributionCount() > players[j].ContributionCount()
+	sort.Slice(players, func(i, j int) bool {
+		ci := players[i].ContributionCount()
+		cj := players[j].ContributionCount()
+		if ci != cj {
+			return ci > cj
+		} else if len(players[i].Merged) == len(players[j].Merged) {
+			return players[i].LastMergeAt.Before(players[j].LastMergeAt)
+		}
+		return len(players[i].Merged) > len(players[j].Merged)
 	})
 	lb.sorted = players
 }

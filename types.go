@@ -59,6 +59,8 @@ type Issue struct {
 }
 
 func NewIssue(issue *github.Issue, repo *Repo) *Issue {
+	// r, _, _ := gh.Reactions.ListIssueReactions(context.TODO(), repo.Owner, repo.Name, issue.GetNumber(), nil)
+	// r[0].
 	iss := &Issue{
 		Title:       issue.GetTitle(),
 		HTMLURL:     issue.GetHTMLURL(),
@@ -81,6 +83,7 @@ type PullRequest struct {
 	*Issue
 	Merged   bool
 	MergedBy string
+	MergedAt time.Time
 }
 
 func NewPullRequest(gh *github.Client, issue *github.Issue, repo *Repo) (*PullRequest, error) {
@@ -89,8 +92,9 @@ func NewPullRequest(gh *github.Client, issue *github.Issue, repo *Repo) (*PullRe
 		return nil, err
 	}
 	p := &PullRequest{
-		Issue:  NewIssue(issue, repo),
-		Merged: pr.GetMerged(),
+		Issue:    NewIssue(issue, repo),
+		Merged:   pr.GetMerged(),
+		MergedAt: pr.GetMergedAt(),
 	}
 	if p.Merged {
 		p.MergedBy = pr.GetMergedBy().GetLogin()
