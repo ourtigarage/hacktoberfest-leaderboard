@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"context"
-	"errors"
 	"fmt"
 	"regexp"
 	"sort"
@@ -73,16 +72,16 @@ func (lb *Leaderboard) PlayersSorted() ([]*Player, error) {
 	return players, nil
 }
 
-func (lb *Leaderboard) Player(username string) (*Player, error) {
-	players, err := lb.queryUserData(username)
-	if err != nil {
-		return nil, err
-	}
-	if len(players) == 0 {
-		return nil, errors.New("Player not found")
-	}
-	return players[username], nil
-}
+// func (lb *Leaderboard) Player(username string) (*Player, error) {
+// 	players, err := lb.queryUserData(username)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	if len(players) == 0 {
+// 		return nil, errors.New("Player not found")
+// 	}
+// 	return players[username], nil
+// }
 
 func (lb *Leaderboard) PlayerNames() ([]string, error) {
 	res, err := retryablehttp.Get(lb.ParticipantFile)
@@ -130,6 +129,7 @@ func (lb *Leaderboard) queryUserData(usernames ...string) (Players, error) {
 			Page:    0,
 		},
 	}
+	repos := map[string]*Repo{}
 	for {
 		res, r, err := lb.GitHub.Search.Issues(context.TODO(), query, &opt)
 		if err != nil {
@@ -138,8 +138,23 @@ func (lb *Leaderboard) queryUserData(usernames ...string) (Players, error) {
 		opt.ListOptions.Page = r.NextPage
 		for _, issue := range res.Issues {
 			p := players[issue.User.GetLogin()]
-			if err := p.AddContrib(issue); err != nil {
-				return players, err
+			repo, ok := repos[issue.GetRepositoryURL()]
+			if !ok {
+				var err error
+				repo, err = NewRepoFromURL(lb.GitHub, issue.GetRepositoryURL())
+				if err != nil {
+					return players, err
+				}
+				repos[issue.GetRepositoryURL()] = repo
+			}
+			if issue.IsPullRequest() {
+				pr, err := NewPullRequest(lb.GitHub, issue, repo)
+				if err != nil {
+					return players, err
+				}
+				p.AddContrib(pr)
+			} else {
+				p.AddIssue(NewIssue(issue, repo))
 			}
 		}
 		if r.NextPage == 0 {
@@ -227,15 +242,17 @@ func (lb *BackgroundLeaderboard) start() {
 
 func (lb *BackgroundLeaderboard) update() {
 	fmt.Println("Collecting data")
+	start := time.Now()
 	players, err := lb.inner.Players()
 	if err != nil {
 		fmt.Println("[ERROR]", err)
 	} else {
+		duration := time.Since(start)
 		lb.lock.Lock()
 		lb.players = players
 		lb.sort()
 		lb.lock.Unlock()
-		fmt.Println("Collection completed")
+		fmt.Println("Collection completed in", duration.String())
 		atomic.StoreInt32(&lb.ready, 1)
 	}
 }

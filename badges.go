@@ -2,7 +2,6 @@ package main
 
 import (
 	"html/template"
-	"strings"
 )
 
 type Badge struct {
@@ -39,7 +38,7 @@ var BADGES = []Badge{
 		func(p *Player) int {
 			c := 0
 			for _, contrib := range p.Contributions {
-				if contrib.GetRepositoryURL() == LEADERBOARD_URL {
+				if contrib.Repo.URL == LEADERBOARD_URL {
 					c += 1
 				}
 			}
@@ -53,7 +52,7 @@ var BADGES = []Badge{
 		func(p *Player) int {
 			c := 0
 			for _, contrib := range p.Contributions {
-				if contrib.GetRepositoryURL() == SNAKE_URL {
+				if contrib.Repo.URL == SNAKE_URL {
 					c += 1
 				}
 			}
@@ -83,7 +82,7 @@ var BADGES = []Badge{
 		func(p *Player) int {
 			c := 0
 			for _, contrib := range p.Contributions {
-				if len(strings.Split(contrib.GetBody(), " ")) >= 100 {
+				if len(contrib.Description) >= 100 {
 					c += 1
 				}
 			}
@@ -97,7 +96,7 @@ var BADGES = []Badge{
 		func(p *Player) int {
 			c := 0
 			for _, contrib := range p.Contributions {
-				if len(strings.TrimSpace(contrib.GetBody())) == 0 {
+				if len(contrib.Description) == 0 {
 					c += 1
 				}
 			}
@@ -111,7 +110,7 @@ var BADGES = []Badge{
 		func(p *Player) int {
 			c := 0
 			for _, contrib := range p.Contributions {
-				if strings.HasPrefix(contrib.GetRepositoryURL(), BASE_REPOS_URL+"/"+p.Username) {
+				if contrib.Repo.Owner == p.Username {
 					c += 1
 				}
 			}
@@ -125,8 +124,21 @@ var BADGES = []Badge{
 		func(p *Player) int {
 			c := 0
 			for _, contrib := range p.Contributions {
-				if !strings.HasPrefix(contrib.GetRepositoryURL(), BASE_REPOS_URL+"/"+p.Username) &&
-					!strings.HasPrefix(contrib.GetRepositoryURL(), ORG_REPOS_URL) {
+				if contrib.Repo.Owner != p.Username && contrib.Repo.Owner != "ourtigarage" {
+					c += 1
+				}
+			}
+			return c
+		},
+	},
+	{
+		"narcissistic",
+		"The narcissistic",
+		"Merged one of his own pull request",
+		func(p *Player) int {
+			c := 0
+			for _, contrib := range p.Contributions {
+				if contrib.Merged && contrib.MergedBy == p.Username {
 					c += 1
 				}
 			}
