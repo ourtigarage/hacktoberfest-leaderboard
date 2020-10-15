@@ -134,7 +134,7 @@ var BADGES = []Badge{
 	{
 		"narcissistic",
 		"The narcissistic",
-		"Merged one of his own pull request",
+		"Merged one of his own tremendous pull request",
 		func(p *Player) int {
 			c := 0
 			for _, contrib := range p.Contributions {
