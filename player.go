@@ -7,7 +7,6 @@ import (
 )
 
 type Player struct {
-	gh                                           *github.Client
 	Username                                     string
 	Avatar                                       string
 	Profile                                      string
@@ -19,9 +18,8 @@ type Player struct {
 
 type Players map[string]*Player
 
-func NewPlayer(user *github.User, gh *github.Client) *Player {
+func NewPlayer(user *github.User) *Player {
 	return &Player{
-		gh:       gh,
 		Username: user.GetLogin(),
 		Avatar:   user.GetAvatarURL(),
 		Profile:  user.GetHTMLURL(),
