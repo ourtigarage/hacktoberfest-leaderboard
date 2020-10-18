@@ -30,10 +30,10 @@ func (r *Repo) HasTopic(topic string) bool {
 	return false
 }
 
-func NewRepoFromURL(gh *github.Client, url string) (*Repo, error) {
+func NewRepoFromURL(ctx context.Context, gh *github.Client, url string) (*Repo, error) {
 	s := strings.Split(url, "/")
 	s = s[len(s)-2:]
-	repo, _, err := gh.Repositories.Get(context.TODO(), s[0], s[1])
+	repo, _, err := gh.Repositories.Get(ctx, s[0], s[1])
 	if err != nil {
 		return nil, err
 	}
@@ -86,11 +86,7 @@ type PullRequest struct {
 	MergedAt time.Time
 }
 
-func NewPullRequest(gh *github.Client, issue *github.Issue, repo *Repo) (*PullRequest, error) {
-	pr, _, err := gh.PullRequests.Get(context.TODO(), repo.Owner, repo.Name, issue.GetNumber())
-	if err != nil {
-		return nil, err
-	}
+func NewPullRequest(pr *github.PullRequest, issue *github.Issue, repo *Repo) (*PullRequest, error) {
 	p := &PullRequest{
 		Issue:    NewIssue(issue, repo),
 		Merged:   pr.GetMerged(),

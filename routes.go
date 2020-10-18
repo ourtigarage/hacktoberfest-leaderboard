@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func routes(lb *BackgroundLeaderboard) http.Handler {
+func routes(lb *Leaderboard) http.Handler {
 	router := mux.NewRouter()
 	router.Methods("GET").Path("/badges").HandlerFunc(badges())
 	sr := router.PathPrefix("/").Subrouter()
@@ -21,7 +21,7 @@ func routes(lb *BackgroundLeaderboard) http.Handler {
 	return router
 }
 
-func serverReady(lb *BackgroundLeaderboard) mux.MiddlewareFunc {
+func serverReady(lb *Leaderboard) mux.MiddlewareFunc {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if !lb.Ready() {
@@ -33,7 +33,7 @@ func serverReady(lb *BackgroundLeaderboard) mux.MiddlewareFunc {
 	}
 }
 
-func index(lb *BackgroundLeaderboard) http.HandlerFunc {
+func index(lb *Leaderboard) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		views.View(w, "index", views.Data{Refresh: int(COLLECT_PERIOD.Seconds()), Data: lb})
 	}
@@ -45,7 +45,7 @@ func badges() http.HandlerFunc {
 	}
 }
 
-func player(lb *BackgroundLeaderboard) http.HandlerFunc {
+func player(lb *Leaderboard) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username := mux.Vars(r)["username"]
 		player, err := lb.Player(username)

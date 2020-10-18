@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gorilla/handlers"
@@ -43,13 +46,37 @@ func loadConfig() {
 
 func main() {
 	loadConfig()
-	bindAddr := fmt.Sprintf("0.0.0.0:%s", PORT)
 
-	lb := NewBackgroundLeaderboard(EVENT_DATE, PARTICIPANTS_FILE)
+	lb := NewLeaderboard(EVENT_DATE, PARTICIPANTS_FILE)
 	hdl := handlers.CombinedLoggingHandler(os.Stdout, routes(lb))
-	fmt.Println("Listenning on", bindAddr)
-	if err := http.ListenAndServe(bindAddr, hdl); err != nil && err != http.ErrServerClosed {
-		panic(err)
+	svcc := make(chan error, 1)
+	server := http.Server{
+		Addr:    fmt.Sprintf("0.0.0.0:%s", PORT),
+		Handler: hdl,
 	}
-	fmt.Println("Shutting down")
+	go func() {
+		defer close(svcc)
+		fmt.Println("Listenning on", server.Addr)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			svcc <- err
+			return
+		}
+		fmt.Println("Server closed")
+	}()
+
+	sigc := make(chan os.Signal, 128)
+	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
+	select {
+	case err := <-svcc:
+		fmt.Fprintln(os.Stderr, "Server exitted:", err)
+		lb.Shutdown()
+	case <-lb.C:
+		fmt.Fprintln(os.Stderr, "Stats fetcher exitted")
+		_ = server.Shutdown(context.Background())
+	case sig := <-sigc:
+		fmt.Printf("Signal %s received. Shutting down server\n", sig.String())
+		lb.Shutdown()
+		_ = server.Shutdown(context.Background())
+		fmt.Println("Graceful shutdown completed")
+	}
 }
