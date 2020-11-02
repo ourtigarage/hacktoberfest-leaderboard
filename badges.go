@@ -145,4 +145,15 @@ var BADGES = []Badge{
 			return c
 		},
 	},
+	{
+		"first-merge",
+		"First merge",
+		"Got his first Pull Request merged",
+		func(p *Player) int {
+			if len(p.Merged) > 0 {
+				return 1
+			}
+			return 0
+		},
+	},
 }
