@@ -92,7 +92,8 @@ func (sc *StatsCollector) queryUserData(ctx context.Context, usernames ...string
 	for _, u := range usernames {
 		user, _, err := sc.GitHub.Users.Get(ctx, u)
 		if err != nil {
-			return nil, err
+			fmt.Printf("[WARN] Cannot fetch user %s: %s\n", u, err)
+			continue
 		}
 		players[user.GetLogin()] = NewPlayer(user)
 	}
