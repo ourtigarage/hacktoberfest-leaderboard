@@ -7,7 +7,7 @@ import (
 	"io"
 )
 
-//go:embed layouts/* pages/*
+//go:embed layouts pages
 var files embed.FS
 
 var views = map[string]*template.Template{}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"leaderboard/static"
 	"leaderboard/views"
 	"net/http"
 
@@ -16,7 +17,7 @@ func routes(lb *Leaderboard) http.Handler {
 	sr.Methods("GET").Path("/").HandlerFunc(index(lb))
 	sr.Methods("GET").Path("/player/{username}").HandlerFunc(player(lb))
 	router.Methods("GET").PathPrefix("/").Handler(
-		http.FileServer(http.Dir("./static")),
+		http.FileServer(http.FS(static.Files)),
 	)
 	return router
 }
