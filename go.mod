@@ -1,4 +1,4 @@
-// +heroku goVersion go1.15
+// +heroku goVersion go1.16
 module leaderboard
 
 go 1.16
