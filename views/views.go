@@ -1,10 +1,14 @@
 package views
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
 	"io"
 )
+
+//go:embed layouts/* pages/*
+var files embed.FS
 
 var views = map[string]*template.Template{}
 
@@ -14,8 +18,8 @@ func init() {
 
 func loadViews(names ...string) {
 	for _, name := range names {
-		file := fmt.Sprintf("./views/pages/%s.tmpl", name)
-		views[name] = template.Must(template.ParseFiles("./views/layouts/main.tmpl", file))
+		file := fmt.Sprintf("pages/%s.tmpl", name)
+		views[name] = template.Must(template.ParseFS(files, "layouts/main.tmpl", file))
 	}
 }
 

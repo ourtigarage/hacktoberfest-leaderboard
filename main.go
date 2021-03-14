@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/handlers"
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -38,6 +39,11 @@ func LookupEnvDefault(key string, def string) string {
 }
 
 func loadConfig() {
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("No .env file to load")
+	} else {
+		fmt.Println("Loaded .env file")
+	}
 	PORT = LookupEnvDefault("PORT", PORT)
 	PARTICIPANTS_FILE = LookupEnvDefault("PARTICIPANTS_FILE", PARTICIPANTS_FILE)
 	EVENT_DATE = LookupEnvDefault("EVENT_DATE", EVENT_DATE)
