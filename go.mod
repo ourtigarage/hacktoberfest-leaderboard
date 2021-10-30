@@ -8,19 +8,19 @@ require (
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
-	github.com/hashicorp/go-retryablehttp v0.6.7
-	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
-	github.com/joho/godotenv v1.3.0
-	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
+	github.com/hashicorp/go-retryablehttp v0.7.0
+	github.com/jinzhu/copier v0.3.2
+	github.com/joho/godotenv v1.4.0
+	golang.org/x/oauth2 v0.0.0-20211028175245-ba495a64dcb5
 )
 
 require (
-	github.com/felixge/httpsnoop v1.0.1 // indirect
-	github.com/golang/protobuf v1.4.2 // indirect
-	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
-	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
-	google.golang.org/appengine v1.6.6 // indirect
-	google.golang.org/protobuf v1.25.0 // indirect
+	github.com/felixge/httpsnoop v1.0.2 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/net v0.0.0-20211029224645-99673261e6eb // indirect
+	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 )
