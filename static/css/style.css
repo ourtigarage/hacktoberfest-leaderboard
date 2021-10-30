@@ -32,3 +32,12 @@ h1{
 .card{
 	word-break: break-word;
 }
+
+.navbar .title-icon {
+	text-align: center;
+}
+
+.navbar .title-icon img {
+	max-width: 8%;
+	max-height: 8%;
+}
