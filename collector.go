@@ -14,7 +14,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-var reUsername = regexp.MustCompile(`^\* .*@([a-zA-Z0-9]+).*$`)
+var reUsername = regexp.MustCompile(`^\* .*@([a-zA-Z0-9][\-a-zA-Z0-9]*[a-zA-Z0-9]).*$`)
 
 func searchQuery(usernames []string, eventDate string) string {
 	b := strings.Builder{}
