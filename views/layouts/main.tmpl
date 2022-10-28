@@ -5,6 +5,7 @@
     {{ if (gt .Refresh 0) }}
     <meta http-equiv="refresh" content="{{ .Refresh }}">
     {{ end }}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/css/spectre.min.css">
     <link rel="stylesheet" href="/css/style.css">
     <title>Hacktoberfest leaderboard</title>
@@ -26,7 +27,7 @@
         <section class="navbar-center">
             <!-- <figure class="avatar avatar-xl s-rounded" style="background-color: white;"> -->
             <div class="title-icon">
-                <img src="/img/hacktoberfest-icon.svg">
+                <img width="1200px" src="/img/hacktoberfest-icon-2022.svg">
             </div>
             <!-- </figure> -->
         </section>
@@ -36,7 +37,7 @@
         </section>
     </header>
     <div id="content">
-        <h1>Hacktoberfest 2021</h1>
+        <h1>Hacktoberfest 2022</h1>
         {{ template "content" .Data }}
     </div>
 </body>

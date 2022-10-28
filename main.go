@@ -25,9 +25,9 @@ const (
 
 var (
 	PORT              = "8080"
-	PARTICIPANTS_FILE = "https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants/2021.md"
+	PARTICIPANTS_FILE = "https://raw.githubusercontent.com/ourtigarage/hacktoberfest-summit/master/participants/2022.md"
 	// EVENT_DATE        = ">=2005"
-	EVENT_DATE = "2021-10"
+	EVENT_DATE = "2022-10"
 	GH_TOKEN   = ""
 )
 
