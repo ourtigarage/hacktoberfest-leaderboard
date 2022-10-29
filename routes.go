@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"leaderboard/static"
 	"leaderboard/views"
 	"net/http"
@@ -11,15 +12,41 @@ import (
 
 func routes(lb *Leaderboard) http.Handler {
 	router := mux.NewRouter()
+
+	// HealthCheck
+	router.Methods("GET").Path("/health/alive").HandlerFunc(healthAlive)
+	router.Methods("GET").Path("/health/ready").HandlerFunc(healthReady(lb))
+
+	// Badges
 	router.Methods("GET").Path("/badges").HandlerFunc(badges())
+
 	sr := router.PathPrefix("/").Subrouter()
 	sr.Use(serverReady(lb))
 	sr.Methods("GET").Path("/").HandlerFunc(index(lb))
 	sr.Methods("GET").Path("/player/{username}").HandlerFunc(player(lb))
+
+	// All other static files
 	router.Methods("GET").PathPrefix("/").Handler(
 		http.FileServer(http.FS(static.Files)),
 	)
 	return router
+}
+
+func healthAlive(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	io.WriteString(w, "OK")
+}
+
+func healthReady(lb *Leaderboard) http.HandlerFunc {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		if !lb.Ready() {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			io.WriteString(w, "NOK")
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		io.WriteString(w, "OK")
+	}
 }
 
 func serverReady(lb *Leaderboard) mux.MiddlewareFunc {
