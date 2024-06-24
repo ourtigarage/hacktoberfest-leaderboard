@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
-	github.com/hashicorp/go-retryablehttp v0.7.1
+	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/jinzhu/copier v0.3.5
 	github.com/joho/godotenv v1.4.0
 	golang.org/x/oauth2 v0.1.0
