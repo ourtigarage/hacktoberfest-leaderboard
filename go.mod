@@ -1,7 +1,7 @@
 // +heroku goVersion go1.19
 module leaderboard
 
-go 1.19
+go 1.24.0
 
 require (
 	github.com/google/go-github/v32 v32.1.0
@@ -19,8 +19,8 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/net v0.23.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 )
